@@ -179,11 +179,9 @@
 			If you want to collaborate or talk about a role, send a note:
 		</p>
 		<div class="contact-row">
-			<a class="btn primary" href="mailto:ian@ianhas.one">ian@ianhas.one</a>
+			<a class="btn primary" href="mailto:toolna@gmail.com">toolna@gmail.com</a>
 			<a class="btn" href="#top">Back to top</a>
 		</div>
-		<p class="fineprint muted">
-			If you prefer a different email address, tell me and I’ll swap it.
-		</p>
+		
 	</div>
 </section>
