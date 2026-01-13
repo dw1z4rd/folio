@@ -8,6 +8,9 @@
 <section class="hero" id="top">
 	<div class="hero-grid">
 		<div class="hero-copy">
+			<div class="portrait-wrapper">
+				<img src="/portrait-sketch.png" alt="Portrait sketch of Ian Buchanan" class="portrait" />
+			</div>
 			<p class="kicker">Software Developer</p>
 			<h1>
 				Ian Buchanan
