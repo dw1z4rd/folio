@@ -1,3 +1,10 @@
+<script lang="ts">
+	import { PUBLIC_GRAVITY_URL, PUBLIC_MESEEKS_URL } from '$env/static/public';
+
+	const aiUrl = (PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
+	const chatUrl = (PUBLIC_GRAVITY_URL ?? 'https://chat.ianhas.one').replace(/\/$/, '');
+</script>
+
 <section class="hero" id="top">
 	<div class="hero-grid">
 		<div class="hero-copy">
@@ -45,28 +52,76 @@
 
 <section class="section" id="work">
 	<h2>Featured work</h2>
-	<p class="section-lead">A couple of projects you can open instantly from the nav.</p>
-	<div class="cards">
+	<p class="section-lead">
+		Two live demos hosted on subdomains, embedded here for a quick look. If your browser blocks embeds,
+		you can still open each project directly.
+	</p>
+
+	<div class="embeds" aria-label="Embedded project demos">
+		<article class="embed-card" aria-label="Project Meseeks embedded demo">
+			<header class="embed-head">
+				<div class="embed-title">
+					<h3>Project Meseeks</h3>
+					<p class="muted mono">ai.ianhas.one</p>
+				</div>
+				<a class="embed-link" href={aiUrl} rel="noopener noreferrer">Open</a>
+			</header>
+			<div class="embed-frame">
+				<iframe
+					title="Project Meseeks (ai.ianhas.one)"
+					src={aiUrl}
+					loading="lazy"
+					referrerpolicy="strict-origin-when-cross-origin"
+					sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+					allow="fullscreen"
+				></iframe>
+			</div>
+		</article>
+
+		<article class="embed-card" aria-label="Gravity Chat embedded demo">
+			<header class="embed-head">
+				<div class="embed-title">
+					<h3>Gravity Chat</h3>
+					<p class="muted mono">chat.ianhas.one</p>
+				</div>
+				<a class="embed-link" href={chatUrl} rel="noopener noreferrer">Open</a>
+			</header>
+			<div class="embed-frame">
+				<iframe
+					title="Gravity Chat (chat.ianhas.one)"
+					src={chatUrl}
+					loading="lazy"
+					referrerpolicy="strict-origin-when-cross-origin"
+					sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+					allow="fullscreen"
+				></iframe>
+			</div>
+		</article>
+	</div>
+
+	<div class="cards explain" aria-label="Project explanations">
 		<article class="card">
-			<h3>Project Meseeks</h3>
+			<h3>Project Meseeks (AI sandbox)</h3>
 			<p class="muted">
-				Live-rendered neuroevolution demos: NEAT agents learning mini-games with performance-minded rendering.
+				A live neuroevolution demo where NEAT agents learn game behaviors in real time. The UI mirrors the
+				simulation from worker snapshots for smooth rendering and clear telemetry.
 			</p>
 			<ul class="bullets">
-				<li>Deterministic environments + reward shaping</li>
-				<li>Worker-driven training loop</li>
-				<li>Visualization-first UI</li>
+				<li>Worker-driven training loop + deterministic environments</li>
+				<li>Reward shaping + curriculum difficulty scaling</li>
+				<li>Network visualization for interpretability</li>
 			</ul>
 		</article>
 		<article class="card">
-			<h3>Gravity Chat</h3>
+			<h3>Gravity Chat (real-time experience)</h3>
 			<p class="muted">
-				A real-time, physics-flavored chat experience with a focus on responsiveness and multiplayer feel.
+				A fast, multiplayer-flavored chat app with physics-inspired interaction. Built to feel responsive,
+				with a focus on realtime sync, stability, and iteration speed.
 			</p>
 			<ul class="bullets">
-				<li>Real-time sync and state encoding</li>
-				<li>Client + server test coverage</li>
-				<li>Fast iteration workflow</li>
+				<li>Realtime state encoding + low-latency updates</li>
+				<li>Performance-minded client interactions</li>
+				<li>Test coverage for core mechanics</li>
 			</ul>
 		</article>
 		<article class="card subtle">

@@ -10,8 +10,8 @@
 	let { children } = $props();
 
 	const siteUrl = (PUBLIC_SITE_URL ?? 'https://ianhas.one').replace(/\/$/, '');
-	const meseeksUrl = (PUBLIC_MESEEKS_URL ?? 'https://meseeks.ianhas.one').replace(/\/$/, '');
-	const gravityUrl = (PUBLIC_GRAVITY_URL ?? 'https://gravitychat.ianhas.one').replace(/\/$/, '');
+	const meseeksUrl = (PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
+	const gravityUrl = (PUBLIC_GRAVITY_URL ?? 'https://chat.ianhas.one').replace(/\/$/, '');
 
 	const title = 'Ian Buchanan — Software Developer';
 	const description =
