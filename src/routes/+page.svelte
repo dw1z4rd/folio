@@ -61,10 +61,10 @@
 	</p>
 
 	<div class="embeds" aria-label="Embedded project demos">
-		<article class="embed-card" aria-label="Project Meseeks embedded demo">
+		<article class="embed-card" aria-label="Darwin.Arcade embedded demo">
 			<header class="embed-head">
 				<div class="embed-title">
-					<h3>Project Meseeks</h3>
+					<h3>Darwin.Arcade</h3>
 					<p class="muted mono">ai.ianhas.one</p>
 				</div>
 				<a class="embed-link" href={aiUrl} rel="noopener noreferrer">Open</a>
@@ -104,7 +104,7 @@
 
 	<div class="cards explain" aria-label="Project explanations">
 		<article class="card">
-			<h3>Project Meseeks (AI sandbox)</h3>
+			<h3>Darwin.Arcade (AI sandbox)</h3>
 			<p class="muted">
 				A live neuroevolution demo where NEAT agents learn game behaviors in real time. The UI mirrors the
 				simulation from worker snapshots for smooth rendering and clear telemetry.
