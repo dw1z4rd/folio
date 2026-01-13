@@ -71,7 +71,7 @@
 			</header>
 			<div class="embed-frame">
 				<iframe
-					title="Project Meseeks (ai.ianhas.one)"
+					title="Darwin.Arcade (ai.ianhas.one)"
 					src={aiUrl}
 					loading="lazy"
 					referrerpolicy="strict-origin-when-cross-origin"
