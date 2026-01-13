@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { PUBLIC_GRAVITY_URL, PUBLIC_MESEEKS_URL } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
 
-	const aiUrl = (PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
-	const chatUrl = (PUBLIC_GRAVITY_URL ?? 'https://chat.ianhas.one').replace(/\/$/, '');
+	const aiUrl = (env.PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
+	const chatUrl = (env.PUBLIC_GRAVITY_URL ?? 'https://chat.ianhas.one').replace(/\/$/, '');
 </script>
 
 <section class="hero" id="top">
