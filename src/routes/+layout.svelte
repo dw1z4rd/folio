@@ -37,7 +37,7 @@
 				<a href="#contact">Contact</a>
 			</nav>
 			<div class="apps">
-				<a class="app-link" href={meseeksUrl} rel="noopener noreferrer">Project Meseeks</a>
+				<a class="app-link" href={meseeksUrl} rel="noopener noreferrer">Darwin.Arcade</a>
 				<a class="app-link" href={gravityUrl} rel="noopener noreferrer">Gravity Chat</a>
 			</div>
 		</div>
