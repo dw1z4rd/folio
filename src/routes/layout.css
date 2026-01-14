@@ -575,11 +575,11 @@ a:hover {
 @keyframes notification-slide-in {
 	0% {
 		opacity: 0;
-		transform: translateY(-20px) scale(0.95);
+		transform: translateX(-50%) translateY(-20px) scale(0.95);
 	}
 	100% {
 		opacity: 1;
-		transform: translateY(0) scale(1);
+		transform: translateX(-50%) translateY(0) scale(1);
 	}
 }
 
@@ -615,24 +615,27 @@ a:hover {
 }
 
 .transfer-notification {
-	position: absolute;
-	top: -70px;
-	left: 0;
-	right: 0;
-	z-index: 10;
+	position: fixed;
+	top: 80px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 100;
 	display: flex;
 	align-items: center;
 	gap: 16px;
 	padding: 16px 20px;
+	max-width: min(90vw, 700px);
 	border-radius: var(--radius);
 	background: linear-gradient(
 		135deg,
-		rgba(255, 80, 60, 0.15),
-		rgba(255, 100, 80, 0.08)
+		rgba(255, 80, 60, 0.25),
+		rgba(255, 100, 80, 0.15)
 	);
+	backdrop-filter: blur(12px);
 	border: 1px solid rgba(255, 80, 60, 0.5);
 	animation: notification-slide-in 0.4s ease-out, notification-pulse 2s ease-in-out infinite;
 	overflow: hidden;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .transfer-notification::before {
