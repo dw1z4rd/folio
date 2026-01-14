@@ -567,3 +567,190 @@ a:hover {
 	border-color: rgba(255, 80, 60, 0.7);
 	transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
+
+/* ─── Bird Transfer Notification ──────────────────────────────────────────── */
+/* Explains to visitors what's happening when birds migrate between apps */
+
+@keyframes notification-slide-in {
+	0% {
+		opacity: 0;
+		transform: translateY(-20px) scale(0.95);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes notification-pulse {
+	0%, 100% {
+		box-shadow:
+			0 4px 24px rgba(255, 100, 60, 0.3),
+			0 0 40px rgba(255, 80, 60, 0.15);
+	}
+	50% {
+		box-shadow:
+			0 8px 32px rgba(255, 100, 60, 0.5),
+			0 0 60px rgba(255, 80, 60, 0.25);
+	}
+}
+
+@keyframes arrow-bounce {
+	0%, 100% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(6px);
+	}
+}
+
+@keyframes arrow-bounce-vertical {
+	0%, 100% {
+		transform: rotate(90deg) translateX(0);
+	}
+	50% {
+		transform: rotate(90deg) translateX(6px);
+	}
+}
+
+.transfer-notification {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 16px 20px;
+	border-radius: var(--radius);
+	background: linear-gradient(
+		135deg,
+		rgba(255, 80, 60, 0.15),
+		rgba(255, 100, 80, 0.08)
+	);
+	border: 1px solid rgba(255, 80, 60, 0.5);
+	animation: notification-slide-in 0.4s ease-out, notification-pulse 2s ease-in-out infinite;
+	position: relative;
+	overflow: hidden;
+}
+
+.transfer-notification::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		rgba(255, 100, 60, 0.1) 50%,
+		transparent 100%
+	);
+	animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+.transfer-icon {
+	flex-shrink: 0;
+	width: 44px;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: rgba(255, 80, 60, 0.2);
+	color: rgba(255, 120, 80, 1);
+	border: 1px solid rgba(255, 80, 60, 0.4);
+}
+
+.transfer-content {
+	flex: 1;
+	min-width: 0;
+	position: relative;
+	z-index: 1;
+}
+
+.transfer-title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--text);
+	letter-spacing: 0.01em;
+}
+
+.transfer-desc {
+	margin: 6px 0 0;
+	font-size: 13px;
+	color: var(--muted);
+	line-height: 1.5;
+}
+
+.transfer-arrow {
+	flex-shrink: 0;
+	color: rgba(255, 100, 60, 0.9);
+	animation: arrow-bounce 1s ease-in-out infinite;
+	position: relative;
+	z-index: 1;
+}
+
+.transfer-arrow.vertical {
+	animation: arrow-bounce-vertical 1s ease-in-out infinite;
+}
+
+@media (max-width: 600px) {
+	.transfer-notification {
+		flex-direction: column;
+		text-align: center;
+		padding: 14px 16px;
+	}
+
+	.transfer-arrow {
+		transform: rotate(90deg);
+	}
+
+	.transfer-arrow.vertical {
+		transform: rotate(90deg);
+	}
+}
+
+/* ─── Source/Destination Badges ───────────────────────────────────────────── */
+/* Labels on embed cards during bird transfer to show direction */
+
+@keyframes badge-pulse {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.85;
+		transform: scale(1.02);
+	}
+}
+
+.transfer-badge {
+	font-family: var(--mono);
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	padding: 5px 10px;
+	border-radius: 6px;
+	animation: badge-pulse 1s ease-in-out infinite;
+	flex-shrink: 0;
+}
+
+.transfer-badge.source {
+	background: linear-gradient(135deg, rgba(255, 80, 60, 0.3), rgba(255, 60, 40, 0.2));
+	color: rgba(255, 140, 100, 1);
+	border: 1px solid rgba(255, 80, 60, 0.5);
+	box-shadow: 0 0 12px rgba(255, 80, 60, 0.3);
+}
+
+.transfer-badge.destination {
+	background: linear-gradient(135deg, rgba(121, 255, 225, 0.25), rgba(100, 200, 180, 0.15));
+	color: rgba(121, 255, 225, 1);
+	border: 1px solid rgba(121, 255, 225, 0.5);
+	box-shadow: 0 0 12px rgba(121, 255, 225, 0.3);
+}

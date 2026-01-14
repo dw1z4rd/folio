@@ -55,6 +55,11 @@
 	let darwinGlowTimeout: ReturnType<typeof setTimeout> | null = null;
 	let gravityGlowTimeout: ReturnType<typeof setTimeout> | null = null;
 
+	// Transfer notification state - shows visitors what's happening
+	let showTransferNotification = false;
+	let transferredBirdCount = 0;
+	let transferNotificationTimeout: ReturnType<typeof setTimeout> | null = null;
+
 	// Detect layout direction based on viewport width
 	// Desktop (side-by-side): horizontal breach
 	// Mobile (stacked): vertical breach
@@ -91,6 +96,11 @@
 		// Clear any existing timeouts
 		if (darwinGlowTimeout) clearTimeout(darwinGlowTimeout);
 		if (gravityGlowTimeout) clearTimeout(gravityGlowTimeout);
+		if (transferNotificationTimeout) clearTimeout(transferNotificationTimeout);
+
+		// Show the transfer notification to visitors
+		transferredBirdCount = escapeMsg.birds.length;
+		showTransferNotification = true;
 
 		// Sequential glow: Darwin first (source), then Gravity Chat (destination)
 		// Phase 1: Darwin glows immediately (birds escaping FROM here)
@@ -111,6 +121,11 @@
 		setTimeout(() => {
 			gravityGlowing = false;
 		}, 2000);
+
+		// Phase 5: Hide the notification after the transfer animation completes
+		transferNotificationTimeout = setTimeout(() => {
+			showTransferNotification = false;
+		}, 4500);
 
 		const arrivalMsg: InfectionArrivalMessage = {
 			type: 'infection-arrival',
@@ -206,12 +221,42 @@
 	</p>
 
 	<div class="embeds" aria-label="Embedded project demos">
+		<!-- Transfer notification overlay -->
+		{#if showTransferNotification}
+			<div class="transfer-notification" aria-live="polite">
+				<div class="transfer-icon">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10"/>
+						<path d="M12 16v-4"/>
+						<path d="M12 8h.01"/>
+					</svg>
+				</div>
+				<div class="transfer-content">
+					<p class="transfer-title">🐦 AI Agent Migration Detected</p>
+					<p class="transfer-desc">
+						{transferredBirdCount} evolved bird{transferredBirdCount !== 1 ? 's' : ''} from Darwin.Arcade 
+						{transferredBirdCount !== 1 ? 'have' : 'has'} escaped and migrated to Gravity Chat. 
+						These apps share the same ecosystem!
+					</p>
+				</div>
+				<div class="transfer-arrow" class:vertical={layoutDirection === 'vertical'}>
+					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M5 12h14"/>
+						<path d="m12 5 7 7-7 7"/>
+					</svg>
+				</div>
+			</div>
+		{/if}
+
 		<article class="embed-card" class:infection-glow={darwinGlowing} aria-label="Darwin.Arcade embedded demo">
 			<header class="embed-head">
 				<div class="embed-title">
 					<h3>Darwin.Arcade</h3>
 					<p class="muted mono">ai.ianhas.one</p>
 				</div>
+				{#if darwinGlowing}
+					<span class="transfer-badge source">SOURCE</span>
+				{/if}
 				<a class="embed-link" href={aiUrl} rel="noopener noreferrer">Open</a>
 			</header>
 			<div class="embed-frame">
@@ -232,6 +277,9 @@
 					<h3>Gravity Chat</h3>
 					<p class="muted mono">chat.ianhas.one</p>
 				</div>
+				{#if gravityGlowing}
+					<span class="transfer-badge destination">DESTINATION</span>
+				{/if}
 				<a class="embed-link" href={chatUrl} rel="noopener noreferrer">Open</a>
 			</header>
 			<div class="embed-frame">
