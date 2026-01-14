@@ -235,8 +235,8 @@
 					<p class="transfer-title">🐦 AI Agent Migration Detected</p>
 					<p class="transfer-desc">
 						{transferredBirdCount} evolved bird{transferredBirdCount !== 1 ? 's' : ''} from Darwin.Arcade 
-						{transferredBirdCount !== 1 ? 'have' : 'has'} escaped and migrated to Gravity Chat. 
-						These apps share the same ecosystem!
+						{transferredBirdCount !== 1 ? 'have' : 'has'} learned to escape {transferredBirdCount !== 1 ? 'their' : 'its'} training environment 
+						and {transferredBirdCount !== 1 ? 'are' : 'is'} now invading Gravity Chat!
 					</p>
 				</div>
 				<div class="transfer-arrow" class:vertical={layoutDirection === 'vertical'}>
