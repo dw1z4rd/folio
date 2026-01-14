@@ -122,10 +122,10 @@
 			gravityGlowing = false;
 		}, 2000);
 
-		// Phase 5: Hide the notification after the transfer animation completes
+		// Phase 5: Hide the notification after the animation completes
 		transferNotificationTimeout = setTimeout(() => {
 			showTransferNotification = false;
-		}, 4500);
+		}, 4000);
 
 		const arrivalMsg: InfectionArrivalMessage = {
 			type: 'infection-arrival',
