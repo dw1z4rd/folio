@@ -1,8 +1,121 @@
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
 	import { env } from '$env/dynamic/public';
 
 	const aiUrl = (env.PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
 	const chatUrl = (env.PUBLIC_GRAVITY_URL ?? 'https://chat.ianhas.one').replace(/\/$/, '');
+
+	// ─── Infection ARG Bridge ────────────────────────────────────────────────────
+	// This bridge listens for escape messages from Darwin.Arcade and forwards them
+	// to Gravity Chat, creating the illusion of AI agents breaching across apps.
+
+	type BreachDirection = 'horizontal' | 'vertical';
+
+	interface EscapedBird {
+		id: string;
+		normalizedY: number;
+		color: string;
+		size: number;
+		velocityX: number;
+		velocityY: number;
+		generation: number;
+	}
+
+	interface InfectionEscapeMessage {
+		type: 'darwin-escape';
+		source: 'darwin-arcade';
+		timestamp: number;
+		birds: EscapedBird[];
+		wallEscape: boolean;
+	}
+
+	interface InfectionArrivalMessage {
+		type: 'infection-arrival';
+		source: 'portfolio-bridge';
+		timestamp: number;
+		birds: EscapedBird[];
+		direction: BreachDirection;
+	}
+
+	// Allowed origins for the infection protocol
+	const ALLOWED_DARWIN_ORIGINS = [
+		'https://ai.ianhas.one',
+		'http://localhost:5173',
+		'http://localhost:4173'
+	];
+
+	let darwinIframe: HTMLIFrameElement | null = null;
+	let gravityIframe: HTMLIFrameElement | null = null;
+	let layoutDirection: BreachDirection = 'horizontal';
+
+	// Detect layout direction based on viewport width
+	// Desktop (side-by-side): horizontal breach
+	// Mobile (stacked): vertical breach
+	function detectLayoutDirection(): BreachDirection {
+		if (typeof window === 'undefined') return 'horizontal';
+		// The embeds stack below 900px based on CSS grid
+		return window.innerWidth >= 900 ? 'horizontal' : 'vertical';
+	}
+
+	function isValidDarwinOrigin(origin: string): boolean {
+		return ALLOWED_DARWIN_ORIGINS.includes(origin) || origin.startsWith('http://localhost:');
+	}
+
+	function isEscapeMessage(data: unknown): data is InfectionEscapeMessage {
+		if (typeof data !== 'object' || data === null) return false;
+		const msg = data as Record<string, unknown>;
+		return msg.type === 'darwin-escape' && msg.source === 'darwin-arcade' && Array.isArray(msg.birds);
+	}
+
+	function handleInfectionMessage(event: MessageEvent): void {
+		// Validate origin
+		if (!isValidDarwinOrigin(event.origin)) return;
+
+		// Validate message
+		if (!isEscapeMessage(event.data)) return;
+
+		// Forward to Gravity Chat
+		forwardToGravityChat(event.data);
+	}
+
+	function forwardToGravityChat(escapeMsg: InfectionEscapeMessage): void {
+		if (!gravityIframe?.contentWindow) return;
+
+		const arrivalMsg: InfectionArrivalMessage = {
+			type: 'infection-arrival',
+			source: 'portfolio-bridge',
+			timestamp: Date.now(),
+			birds: escapeMsg.birds,
+			direction: layoutDirection
+		};
+
+		try {
+			gravityIframe.contentWindow.postMessage(arrivalMsg, '*');
+		} catch {
+			// Silently fail if posting fails
+		}
+	}
+
+	function handleResize(): void {
+		layoutDirection = detectLayoutDirection();
+	}
+
+	onMount(() => {
+		layoutDirection = detectLayoutDirection();
+
+		// Find the iframes after mount
+		darwinIframe = document.querySelector('iframe[title*="Darwin"]');
+		gravityIframe = document.querySelector('iframe[title*="Gravity"]');
+
+		// Listen for infection messages from Darwin.Arcade
+		window.addEventListener('message', handleInfectionMessage);
+		window.addEventListener('resize', handleResize);
+	});
+
+	onDestroy(() => {
+		window.removeEventListener('message', handleInfectionMessage);
+		window.removeEventListener('resize', handleResize);
+	});
 </script>
 
 <section class="hero" id="top">
