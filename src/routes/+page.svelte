@@ -49,6 +49,11 @@
 	let gravityIframe: HTMLIFrameElement | null = null;
 	let layoutDirection: BreachDirection = 'horizontal';
 
+	// Glow effect state for bird transfer visualization
+	let darwinGlowing = false;
+	let gravityGlowing = false;
+	let glowTimeout: ReturnType<typeof setTimeout> | null = null;
+
 	// Detect layout direction based on viewport width
 	// Desktop (side-by-side): horizontal breach
 	// Mobile (stacked): vertical breach
@@ -81,6 +86,19 @@
 
 	function forwardToGravityChat(escapeMsg: InfectionEscapeMessage): void {
 		if (!gravityIframe?.contentWindow) return;
+
+		// Trigger glow effect on both iframes
+		darwinGlowing = true;
+		gravityGlowing = true;
+
+		// Clear any existing timeout
+		if (glowTimeout) clearTimeout(glowTimeout);
+
+		// Fade out after animation
+		glowTimeout = setTimeout(() => {
+			darwinGlowing = false;
+			gravityGlowing = false;
+		}, 1500);
 
 		const arrivalMsg: InfectionArrivalMessage = {
 			type: 'infection-arrival',
@@ -176,7 +194,7 @@
 	</p>
 
 	<div class="embeds" aria-label="Embedded project demos">
-		<article class="embed-card" aria-label="Darwin.Arcade embedded demo">
+		<article class="embed-card" class:infection-glow={darwinGlowing} aria-label="Darwin.Arcade embedded demo">
 			<header class="embed-head">
 				<div class="embed-title">
 					<h3>Darwin.Arcade</h3>
@@ -196,7 +214,7 @@
 			</div>
 		</article>
 
-		<article class="embed-card" aria-label="Gravity Chat embedded demo">
+		<article class="embed-card" class:infection-glow={gravityGlowing} aria-label="Gravity Chat embedded demo">
 			<header class="embed-head">
 				<div class="embed-title">
 					<h3>Gravity Chat</h3>

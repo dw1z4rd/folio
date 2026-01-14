@@ -531,3 +531,39 @@ a:hover {
 		height: 620px;
 	}
 }
+
+/* ─── Infection Bird Transfer Glow Effect ─────────────────────────────────── */
+/* Creates a pulsing, eerie glow when birds escape from one app to another */
+
+@keyframes infection-pulse {
+	0% {
+		box-shadow:
+			0 0 20px rgba(255, 60, 60, 0.4),
+			0 0 40px rgba(255, 60, 60, 0.2),
+			0 0 60px rgba(255, 60, 60, 0.1),
+			inset 0 0 20px rgba(255, 60, 60, 0.05);
+		border-color: rgba(255, 60, 60, 0.6);
+	}
+	50% {
+		box-shadow:
+			0 0 30px rgba(255, 100, 60, 0.6),
+			0 0 60px rgba(255, 80, 40, 0.35),
+			0 0 90px rgba(255, 60, 30, 0.2),
+			inset 0 0 30px rgba(255, 80, 60, 0.08);
+		border-color: rgba(255, 100, 60, 0.8);
+	}
+	100% {
+		box-shadow:
+			0 0 20px rgba(255, 60, 60, 0.4),
+			0 0 40px rgba(255, 60, 60, 0.2),
+			0 0 60px rgba(255, 60, 60, 0.1),
+			inset 0 0 20px rgba(255, 60, 60, 0.05);
+		border-color: rgba(255, 60, 60, 0.6);
+	}
+}
+
+.embed-card.infection-glow {
+	animation: infection-pulse 0.4s ease-in-out 3;
+	border-color: rgba(255, 80, 60, 0.7);
+	transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
