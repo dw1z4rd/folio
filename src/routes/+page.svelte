@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import { env } from '$env/dynamic/public';
 
 	const aiUrl = (env.PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
@@ -113,6 +114,7 @@
 	});
 
 	onDestroy(() => {
+		if (!browser) return;
 		window.removeEventListener('message', handleInfectionMessage);
 		window.removeEventListener('resize', handleResize);
 	});
