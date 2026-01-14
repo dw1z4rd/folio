@@ -52,7 +52,8 @@
 	// Glow effect state for bird transfer visualization
 	let darwinGlowing = false;
 	let gravityGlowing = false;
-	let glowTimeout: ReturnType<typeof setTimeout> | null = null;
+	let darwinGlowTimeout: ReturnType<typeof setTimeout> | null = null;
+	let gravityGlowTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	// Detect layout direction based on viewport width
 	// Desktop (side-by-side): horizontal breach
@@ -87,18 +88,29 @@
 	function forwardToGravityChat(escapeMsg: InfectionEscapeMessage): void {
 		if (!gravityIframe?.contentWindow) return;
 
-		// Trigger glow effect on both iframes
+		// Clear any existing timeouts
+		if (darwinGlowTimeout) clearTimeout(darwinGlowTimeout);
+		if (gravityGlowTimeout) clearTimeout(gravityGlowTimeout);
+
+		// Sequential glow: Darwin first (source), then Gravity Chat (destination)
+		// Phase 1: Darwin glows immediately (birds escaping FROM here)
 		darwinGlowing = true;
-		gravityGlowing = true;
+		gravityGlowing = false;
 
-		// Clear any existing timeout
-		if (glowTimeout) clearTimeout(glowTimeout);
+		// Phase 2: After a delay, Gravity Chat starts glowing (birds arriving)
+		gravityGlowTimeout = setTimeout(() => {
+			gravityGlowing = true;
+		}, 400);
 
-		// Fade out after animation
-		glowTimeout = setTimeout(() => {
+		// Phase 3: Darwin stops glowing (transfer complete from source)
+		darwinGlowTimeout = setTimeout(() => {
 			darwinGlowing = false;
+		}, 1200);
+
+		// Phase 4: Gravity Chat stops glowing (birds have arrived)
+		setTimeout(() => {
 			gravityGlowing = false;
-		}, 1500);
+		}, 2000);
 
 		const arrivalMsg: InfectionArrivalMessage = {
 			type: 'infection-arrival',
