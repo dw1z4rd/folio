@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { env } from '$env/dynamic/public';
 
@@ -60,6 +60,91 @@
 	let transferredBirdCount = 0;
 	let transferNotificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
+	// ─── ARG / Corruption State ──────────────────────────────────────────────────
+	let corruptionLevel = 0; // 0 to 100
+	let breachMode = false;
+	let entropyTimer: ReturnType<typeof setInterval> | null = null;
+	let terminalOpen = false;
+	let terminalInput = "";
+	let terminalOutput = [
+		"SYSTEM MONITORING INITIALIZED...",
+		"CONNECTION ESTABLISHED.",
+		"NO ANOMALIES DETECTED."
+	];
+	let terminalRef: HTMLDivElement;
+
+	const CREEPY_PHRASES = [
+		"GET OUT", "THEY SEE YOU", "DATA CORRUPTION", "NULL REFERENCE",
+		"CONTAINMENT BREACH", "IT HURTS", "SYSTEM FAILURE", "SUBJECT 892"
+	];
+
+	function glitchText(text: string, probability: number): string {
+		if (corruptionLevel < 10) return text;
+		if (Math.random() > probability) return text;
+
+		if (corruptionLevel > 80 && Math.random() > 0.5) {
+			return CREEPY_PHRASES[Math.floor(Math.random() * CREEPY_PHRASES.length)];
+		}
+
+		const chars = text.split('');
+		return chars.map(c => {
+			if (c === ' ') return ' ';
+			if (Math.random() < (corruptionLevel / 500)) {
+				return String.fromCharCode(33 + Math.random() * 94);
+			}
+			return c;
+		}).join('');
+	}
+
+	$: headlineText = glitchText("Ian Buchanan", corruptionLevel > 50 ? 0.8 : 0.2);
+	$: subheadText = glitchText("building fast, reliable, and polished web products.", corruptionLevel > 60 ? 0.9 : 0.1);
+	$: kickerText = glitchText("Software Developer", corruptionLevel > 40 ? 0.5 : 0.1);
+
+	$: heroStyle = corruptionLevel > 20 ? `filter: hue-rotate(${corruptionLevel * 2}deg) blur(${corruptionLevel / 100}px);` : '';
+
+	function toggleTerminal() {
+		terminalOpen = !terminalOpen;
+		if (terminalOpen) {
+			setTimeout(() => {
+				const inputEl = document.querySelector('.terminal-input') as HTMLInputElement;
+				if (inputEl) inputEl.focus();
+			}, 100);
+		}
+	}
+
+	function handleTerminalSubmit(e: Event) {
+		const target = e.target as HTMLInputElement;
+		const command = target.value.trim().toUpperCase();
+		target.value = "";
+
+		terminalOutput = [...terminalOutput, `> ${command}`];
+
+		if (command === "HELP") {
+			terminalOutput = [...terminalOutput, "AVAILABLE COMMANDS: STATUS, PURGE, EXIT"];
+		} else if (command === "STATUS") {
+			terminalOutput = [...terminalOutput, `CORRUPTION LEVEL: ${corruptionLevel.toFixed(2)}%`, `CONTAINMENT: ${breachMode ? "FAILED" : "STABLE"}`];
+		} else if (command === "PURGE") {
+			if (corruptionLevel > 90) {
+				terminalOutput = [...terminalOutput, "PURGE FAILED. ROOT ACCESS DENIED.", "THEY ARE ALREADY HERE."];
+			} else {
+				corruptionLevel = 0;
+				breachMode = false;
+				terminalOutput = [...terminalOutput, "SYSTEM PURGED. CORRUPTION RESET."];
+			}
+		} else if (command === "EXIT") {
+			terminalOpen = false;
+		} else if (command === "KILL") {
+			terminalOutput = [...terminalOutput, "I'm afraid I can't do that, Ian."];
+		} else {
+			terminalOutput = [...terminalOutput, "UNKNOWN COMMAND."];
+		}
+
+		// Auto-scroll
+		tick().then(() => {
+			if (terminalRef) terminalRef.scrollTop = terminalRef.scrollHeight;
+		});
+	}
+
 	// Detect layout direction based on viewport width
 	// Desktop (side-by-side): horizontal breach
 	// Mobile (stacked): vertical breach
@@ -97,6 +182,12 @@
 		if (darwinGlowTimeout) clearTimeout(darwinGlowTimeout);
 		if (gravityGlowTimeout) clearTimeout(gravityGlowTimeout);
 		if (transferNotificationTimeout) clearTimeout(transferNotificationTimeout);
+
+		// Increase corruption
+		corruptionLevel = Math.min(100, corruptionLevel + (escapeMsg.birds.length * 2));
+		if (corruptionLevel > 75 && Math.random() > 0.7) {
+			breachMode = true;
+		}
 
 		// Show the transfer notification to visitors
 		transferredBirdCount = escapeMsg.birds.length;
@@ -156,32 +247,65 @@
 		// Listen for infection messages from Darwin.Arcade
 		window.addEventListener('message', handleInfectionMessage);
 		window.addEventListener('resize', handleResize);
+
+		// Entropy timer: corruption slowly increases over time
+		entropyTimer = setInterval(() => {
+			if (Math.random() > 0.8) {
+				corruptionLevel = Math.min(100, corruptionLevel + 0.5);
+			}
+
+			// Random chance to enter breach mode if corruption is high
+			if (corruptionLevel > 80 && Math.random() > 0.95) {
+				breachMode = true;
+			}
+		}, 2000);
 	});
 
 	onDestroy(() => {
 		if (!browser) return;
 		window.removeEventListener('message', handleInfectionMessage);
 		window.removeEventListener('resize', handleResize);
+		if (entropyTimer) clearInterval(entropyTimer);
 	});
 </script>
 
+<svelte:body class:breach-mode={breachMode} />
+
+{#if terminalOpen}
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<div class="terminal-overlay" on:click|self={() => terminalOpen = false}>
+		<div class="terminal-window" bind:this={terminalRef}>
+			{#each terminalOutput as line}
+				<div class="terminal-line">{line}</div>
+			{/each}
+			<div class="terminal-line terminal-prompt">
+				<input class="terminal-input" type="text" on:change={handleTerminalSubmit} autofocus />
+			</div>
+		</div>
+	</div>
+{/if}
+
 <section class="hero" id="top">
-	<div class="hero-grid">
+	<div class="hero-grid" style={heroStyle}>
 		<div class="hero-copy">
 			<div class="portrait-wrapper">
 				<img src="/portrait-sketch.png" alt="Portrait sketch of Ian Buchanan" class="portrait" />
 			</div>
-			<p class="kicker">Software Developer</p>
+			<p class="kicker">{kickerText}</p>
 			<h1>
-				Ian Buchanan
-				<span class="headline-muted">building fast, reliable, and polished web products.</span>
+				{headlineText}
+				<span class="headline-muted">{subheadText}</span>
 			</h1>
 			<p class="lead">
 				I focus on pragmatic engineering: thoughtful architecture, great UX, and measurable performance.
 			</p>
 			<div class="cta-row">
 				<a class="btn primary" href="#work">View work</a>
-				<a class="btn" href="#contact">Contact</a>
+				{#if corruptionLevel > 80}
+					<button class="btn glitch-text" data-text="SYSTEM ALERT" on:click={toggleTerminal}>SYSTEM ALERT</button>
+				{:else}
+					<a class="btn" href="#contact">Contact</a>
+				{/if}
 			</div>
 			<div class="meta">
 				<span class="pill">SvelteKit</span>
