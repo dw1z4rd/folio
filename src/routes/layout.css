@@ -930,3 +930,91 @@ body.breach-mode .btn:hover {
 	content: "> ";
 	color: #0f0;
 }
+
+/* ─── Gradual Corruption Effects ──────────────────────────────────────────── */
+/* Colors and effects subtly shift as corruption increases over time */
+
+.corruption-wrapper {
+	transition: filter 2s ease-out;
+}
+
+/* Corruption level 1-2 (10-20%): Barely noticeable hue shift */
+.corruption-wrapper[data-corruption="1"],
+.corruption-wrapper[data-corruption="2"] {
+	filter: hue-rotate(5deg);
+}
+
+/* Corruption level 3-4 (30-40%): Slight color shift becomes more apparent */
+.corruption-wrapper[data-corruption="3"],
+.corruption-wrapper[data-corruption="4"] {
+	filter: hue-rotate(15deg) saturate(1.1);
+}
+
+/* Corruption level 5-6 (50-60%): Noticeable shift toward red tones */
+.corruption-wrapper[data-corruption="5"],
+.corruption-wrapper[data-corruption="6"] {
+	filter: hue-rotate(30deg) saturate(1.2);
+}
+
+.corruption-wrapper[data-corruption="5"] .portrait,
+.corruption-wrapper[data-corruption="6"] .portrait {
+	filter: grayscale(0.2) sepia(0.1);
+}
+
+/* Corruption level 7-8 (70-80%): Obvious corruption, dark red tones */
+.corruption-wrapper[data-corruption="7"],
+.corruption-wrapper[data-corruption="8"] {
+	filter: hue-rotate(50deg) saturate(1.3) brightness(0.95);
+}
+
+.corruption-wrapper[data-corruption="7"] .portrait,
+.corruption-wrapper[data-corruption="8"] .portrait {
+	filter: grayscale(0.5) sepia(0.3) hue-rotate(-20deg);
+	animation: subtle-flicker 5s ease-in-out infinite;
+}
+
+/* Corruption level 9-10 (90-100%): Full horror mode */
+.corruption-wrapper[data-corruption="9"],
+.corruption-wrapper[data-corruption="10"] {
+	filter: hue-rotate(80deg) saturate(1.5) brightness(0.9);
+}
+
+.corruption-wrapper[data-corruption="9"] .portrait,
+.corruption-wrapper[data-corruption="10"] .portrait {
+	filter: grayscale(0.8) contrast(1.3) brightness(0.7) sepia(0.4) hue-rotate(-20deg);
+	animation: flicker 3s ease-in-out infinite;
+}
+
+@keyframes subtle-flicker {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.98;
+	}
+}
+
+@keyframes flicker {
+	0%, 100% {
+		opacity: 1;
+	}
+	25%, 75% {
+		opacity: 0.95;
+	}
+	50% {
+		opacity: 0.85;
+	}
+}
+
+/* Subtle text shadow that appears gradually */
+.corruption-wrapper[data-corruption="5"] h1,
+.corruption-wrapper[data-corruption="6"] h1,
+.corruption-wrapper[data-corruption="7"] h1,
+.corruption-wrapper[data-corruption="8"] h1 {
+	text-shadow: 1px 1px 2px rgba(139, 0, 0, 0.3);
+}
+
+.corruption-wrapper[data-corruption="9"] h1,
+.corruption-wrapper[data-corruption="10"] h1 {
+	text-shadow: 2px 2px 4px rgba(139, 0, 0, 0.6);
+}

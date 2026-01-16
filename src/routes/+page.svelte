@@ -61,9 +61,12 @@
 	let transferNotificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	// ─── ARG / Corruption State ──────────────────────────────────────────────────
-	let corruptionLevel = 0; // 0 to 100
+	let corruptionLevel = 0; // 0 to 100 - starts at 0 for normal portfolio
 	let breachMode = false;
 	let entropyTimer: ReturnType<typeof setInterval> | null = null;
+	let timeOnSite = 0; // Track time user has been on site
+	let scrollDistance = 0; // Track total scroll distance
+	let interactionCount = 0; // Track user interactions
 	let terminalOpen = false;
 	let terminalInput = "";
 	let terminalOutput = [
@@ -73,34 +76,84 @@
 	];
 	let terminalRef: HTMLDivElement;
 
-	const CREEPY_PHRASES = [
-		"GET OUT", "THEY SEE YOU", "DATA CORRUPTION", "NULL REFERENCE",
-		"CONTAINMENT BREACH", "IT HURTS", "SYSTEM FAILURE", "SUBJECT 892"
-	];
+	// Text replacements that happen gradually as corruption increases
+	const TEXT_MUTATIONS = {
+		"Software Developer": [
+			{ threshold: 15, text: "Software Developer" },
+			{ threshold: 30, text: "Code Architect" },
+			{ threshold: 50, text: "Digital Architect" },
+			{ threshold: 70, text: "Dark Architect" }
+		],
+		"building fast, reliable, and polished web products.": [
+			{ threshold: 20, text: "building fast, reliable, and polished web products." },
+			{ threshold: 35, text: "crafting efficient, elegant digital experiences." },
+			{ threshold: 55, text: "weaving intricate digital creations." },
+			{ threshold: 75, text: "summoning entities from the digital abyss." }
+		],
+		"Now": [
+			{ threshold: 25, text: "Now" },
+			{ threshold: 60, text: "Current State" }
+		],
+		"Building interactive demos + real-time experiences": [
+			{ threshold: 25, text: "Building interactive demos + real-time experiences" },
+			{ threshold: 50, text: "Creating immersive digital experiences" },
+			{ threshold: 70, text: "Manifesting digital horrors + eldritch experiences" }
+		],
+		"Product engineering": [
+			{ threshold: 30, text: "Product engineering" },
+			{ threshold: 65, text: "Summoning entities" }
+		],
+		"Shipping clean code": [
+			{ threshold: 30, text: "Shipping clean code" },
+			{ threshold: 65, text: "Weaving nightmares" }
+		],
+		"Minimal, readable, tested": [
+			{ threshold: 30, text: "Minimal, readable, tested" },
+			{ threshold: 65, text: "Dark, cryptic, cursed" }
+		]
+	};
+
+	function getMutatedText(originalText: string): string {
+		const mutations = TEXT_MUTATIONS[originalText];
+		if (!mutations) return originalText;
+		
+		// Find the appropriate mutation based on corruption level
+		for (let i = mutations.length - 1; i >= 0; i--) {
+			if (corruptionLevel >= mutations[i].threshold) {
+				return mutations[i].text;
+			}
+		}
+		return originalText;
+	}
 
 	function glitchText(text: string, probability: number): string {
-		if (corruptionLevel < 10) return text;
+		// Only start glitching after significant corruption
+		if (corruptionLevel < 40) return text;
 		if (Math.random() > probability) return text;
-
-		if (corruptionLevel > 80 && Math.random() > 0.5) {
-			return CREEPY_PHRASES[Math.floor(Math.random() * CREEPY_PHRASES.length)];
-		}
 
 		const chars = text.split('');
 		return chars.map(c => {
 			if (c === ' ') return ' ';
-			if (Math.random() < (corruptionLevel / 500)) {
+			if (Math.random() < (corruptionLevel / 800)) { // Reduced glitch frequency
 				return String.fromCharCode(33 + Math.random() * 94);
 			}
 			return c;
 		}).join('');
 	}
 
-	$: headlineText = glitchText("Ian Buchanan", corruptionLevel > 50 ? 0.8 : 0.2);
-	$: subheadText = glitchText("building fast, reliable, and polished web products.", corruptionLevel > 60 ? 0.9 : 0.1);
-	$: kickerText = glitchText("Software Developer", corruptionLevel > 40 ? 0.5 : 0.1);
+	// Use mutations instead of immediate glitching
+	$: kickerText = getMutatedText("Software Developer");
+	$: subheadText = corruptionLevel > 60 ? glitchText(getMutatedText("building fast, reliable, and polished web products."), 0.3) : getMutatedText("building fast, reliable, and polished web products.");
+	$: headlineText = corruptionLevel > 70 ? glitchText("Ian Buchanan", 0.2) : "Ian Buchanan";
+	
+	// Card mutations
+	$: cardTitle = getMutatedText("Now");
+	$: cardDescription = getMutatedText("Building interactive demos + real-time experiences");
+	$: focusValue = getMutatedText("Product engineering");
+	$: strengthValue = getMutatedText("Shipping clean code");
+	$: styleValue = getMutatedText("Minimal, readable, tested");
 
-	$: heroStyle = corruptionLevel > 20 ? `filter: hue-rotate(${corruptionLevel * 2}deg) blur(${corruptionLevel / 100}px);` : '';
+	$: heroStyle = corruptionLevel > 40 ? `filter: hue-rotate(${corruptionLevel}deg) blur(${corruptionLevel / 200}px);` : '';
 
 	function toggleTerminal() {
 		terminalOpen = !terminalOpen;
@@ -237,6 +290,22 @@
 		layoutDirection = detectLayoutDirection();
 	}
 
+	function handleScroll() {
+		scrollDistance += 1;
+		// Very slow corruption from scrolling
+		if (scrollDistance % 100 === 0) {
+			corruptionLevel = Math.min(100, corruptionLevel + 0.1);
+		}
+	}
+
+	function handleClick() {
+		interactionCount += 1;
+		// Tiny corruption from clicks
+		if (interactionCount % 10 === 0) {
+			corruptionLevel = Math.min(100, corruptionLevel + 0.2);
+		}
+	}
+
 	onMount(() => {
 		layoutDirection = detectLayoutDirection();
 
@@ -247,29 +316,49 @@
 		// Listen for infection messages from Darwin.Arcade
 		window.addEventListener('message', handleInfectionMessage);
 		window.addEventListener('resize', handleResize);
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		window.addEventListener('click', handleClick);
 
-		// Entropy timer: corruption slowly increases over time
+		// Very gradual entropy timer: corruption increases SLOWLY over time
+		// Takes ~20 minutes to reach high corruption levels just from time alone
 		entropyTimer = setInterval(() => {
-			if (Math.random() > 0.8) {
-				corruptionLevel = Math.min(100, corruptionLevel + 0.5);
+			timeOnSite += 5; // Increment every 5 seconds
+			
+			// Only a small chance of tiny corruption increase
+			if (Math.random() > 0.7) {
+				corruptionLevel = Math.min(100, corruptionLevel + 0.05);
 			}
 
-			// Random chance to enter breach mode if corruption is high
-			if (corruptionLevel > 80 && Math.random() > 0.95) {
+			// Breach mode only after SIGNIFICANT corruption
+			if (corruptionLevel > 85 && Math.random() > 0.98) {
 				breachMode = true;
 			}
-		}, 2000);
+		}, 5000); // Check every 5 seconds instead of 2
 	});
 
 	onDestroy(() => {
 		if (!browser) return;
 		window.removeEventListener('message', handleInfectionMessage);
 		window.removeEventListener('resize', handleResize);
+		window.removeEventListener('scroll', handleScroll);
+		window.removeEventListener('click', handleClick);
 		if (entropyTimer) clearInterval(entropyTimer);
 	});
 </script>
 
 <svelte:body class:breach-mode={breachMode} />
+
+<!-- Corruption-driven CSS variables -->
+<svelte:head>
+	<style>
+		:root {{
+			--corruption-hue: {Math.min(corruptionLevel * 2, 180)}deg;
+			--corruption-opacity: {Math.min(corruptionLevel / 100, 1)};
+		}}
+	</style>
+</svelte:head>
+
+<div class="corruption-wrapper" data-corruption={Math.floor(corruptionLevel / 10)}>
 
 {#if terminalOpen}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -316,21 +405,21 @@
 
 		<div class="hero-card">
 			<div class="card-top">
-				<p class="card-title">Now</p>
-				<p class="muted">Building interactive demos + real-time experiences</p>
+				<p class="card-title">{cardTitle}</p>
+				<p class="muted">{cardDescription}</p>
 			</div>
 			<div class="card-metrics">
 				<div class="metric">
 					<p class="metric-label">Focus</p>
-					<p class="metric-value">Product engineering</p>
+					<p class="metric-value">{focusValue}</p>
 				</div>
 				<div class="metric">
 					<p class="metric-label">Strength</p>
-					<p class="metric-value">Shipping clean code</p>
+					<p class="metric-value">{strengthValue}</p>
 				</div>
 				<div class="metric">
 					<p class="metric-label">Style</p>
-					<p class="metric-value">Minimal, readable, tested</p>
+					<p class="metric-value">{styleValue}</p>
 				</div>
 			</div>
 		</div>
@@ -505,3 +594,5 @@
 		
 	</div>
 </section>
+
+</div> <!-- Close corruption-wrapper -->
