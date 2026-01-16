@@ -1,17 +1,17 @@
 @import '@fontsource/fira-mono';
 
 :root {
-	--bg: #060817;
-	--bg-2: #0b0f1a;
-	--panel: rgba(255, 255, 255, 0.06);
-	--panel-2: rgba(255, 255, 255, 0.04);
-	--border: rgba(255, 255, 255, 0.12);
-	--text: rgba(255, 255, 255, 0.92);
-	--muted: rgba(255, 255, 255, 0.66);
-	--faint: rgba(255, 255, 255, 0.42);
-	--accent: #79ffe1;
-	--accent-2: #a78bfa;
-	--shadow: 0 14px 60px rgba(0, 0, 0, 0.55);
+	--bg: #000000;
+	--bg-2: #0a0000;
+	--panel: rgba(139, 0, 0, 0.15);
+	--panel-2: rgba(139, 0, 0, 0.08);
+	--border: rgba(139, 0, 0, 0.35);
+	--text: rgba(220, 220, 220, 0.95);
+	--muted: rgba(180, 150, 150, 0.75);
+	--faint: rgba(150, 120, 120, 0.55);
+	--accent: #8b0000;
+	--accent-2: #4a0000;
+	--shadow: 0 14px 60px rgba(139, 0, 0, 0.65);
 	--radius: 14px;
 	--radius-sm: 10px;
 	--max: 1040px;
@@ -35,9 +35,19 @@ body {
 body {
 	margin: 0;
 	background:
-		radial-gradient(900px 500px at 12% 12%, rgba(167, 139, 250, 0.22), rgba(167, 139, 250, 0) 60%),
-		radial-gradient(800px 560px at 86% 22%, rgba(121, 255, 225, 0.14), rgba(121, 255, 225, 0) 70%),
+		radial-gradient(900px 500px at 12% 12%, rgba(139, 0, 0, 0.35), rgba(139, 0, 0, 0) 60%),
+		radial-gradient(800px 560px at 86% 22%, rgba(80, 0, 0, 0.25), rgba(80, 0, 0, 0) 70%),
 		linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+	animation: breathing 8s ease-in-out infinite;
+}
+
+@keyframes breathing {
+	0%, 100% {
+		filter: brightness(1);
+	}
+	50% {
+		filter: brightness(0.85);
+	}
 }
 
 a {
@@ -68,9 +78,10 @@ a:hover {
 	position: sticky;
 	top: 0;
 	z-index: 10;
-	background: rgba(7, 9, 22, 0.72);
+	background: rgba(10, 0, 0, 0.85);
 	backdrop-filter: blur(12px);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid rgba(139, 0, 0, 0.35);
+	box-shadow: 0 4px 20px rgba(139, 0, 0, 0.4);
 }
 
 .topbar-inner {
@@ -100,8 +111,9 @@ a:hover {
 }
 
 .nav a:hover {
-	background: rgba(255, 255, 255, 0.06);
+	background: rgba(139, 0, 0, 0.25);
 	color: var(--text);
+	box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
 }
 
 .apps {
@@ -112,14 +124,15 @@ a:hover {
 .app-link {
 	padding: 8px 10px;
 	border-radius: 10px;
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: rgba(139, 0, 0, 0.15);
+	border: 1px solid rgba(139, 0, 0, 0.35);
 	color: var(--muted);
 }
 
 .app-link:hover {
 	color: var(--text);
-	border-color: rgba(255, 255, 255, 0.18);
+	border-color: rgba(139, 0, 0, 0.6);
+	box-shadow: 0 0 15px rgba(139, 0, 0, 0.5);
 }
 
 .content {
@@ -130,8 +143,9 @@ a:hover {
 }
 
 .footer {
-	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	border-top: 1px solid rgba(139, 0, 0, 0.35);
 	padding: 22px 18px;
+	box-shadow: 0 -4px 20px rgba(139, 0, 0, 0.3);
 }
 
 .footer-inner {
@@ -171,9 +185,19 @@ a:hover {
 	border-radius: 50%;
 	overflow: hidden;
 	margin-bottom: 18px;
-	border: 2px solid rgba(255, 255, 255, 0.12);
-	background: linear-gradient(135deg, rgba(121, 255, 225, 0.15), rgba(167, 139, 250, 0.15));
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+	border: 2px solid rgba(139, 0, 0, 0.6);
+	background: linear-gradient(135deg, rgba(139, 0, 0, 0.35), rgba(80, 0, 0, 0.25));
+	box-shadow: 0 8px 32px rgba(139, 0, 0, 0.7), 0 0 40px rgba(139, 0, 0, 0.4);
+	animation: pulse-shadow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-shadow {
+	0%, 100% {
+		box-shadow: 0 8px 32px rgba(139, 0, 0, 0.7), 0 0 40px rgba(139, 0, 0, 0.4);
+	}
+	50% {
+		box-shadow: 0 8px 32px rgba(139, 0, 0, 0.9), 0 0 60px rgba(139, 0, 0, 0.6);
+	}
 }
 
 .portrait {
@@ -181,6 +205,20 @@ a:hover {
 	height: 100%;
 	object-fit: cover;
 	object-position: center 15%;
+	filter: grayscale(0.8) contrast(1.2) brightness(0.7) sepia(0.3) hue-rotate(-20deg);
+	animation: flicker 5s ease-in-out infinite;
+}
+
+@keyframes flicker {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.85;
+	}
+	25%, 75% {
+		opacity: 0.95;
+	}
 }
 
 .kicker {
@@ -225,24 +263,27 @@ a:hover {
 .btn {
 	border-radius: 12px;
 	padding: 10px 12px;
-	border: 1px solid rgba(255, 255, 255, 0.14);
-	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(139, 0, 0, 0.5);
+	background: rgba(139, 0, 0, 0.15);
 	color: var(--text);
 	transition:
 		transform 0.12s ease,
 		border-color 0.12s ease,
-		background 0.12s ease;
+		background 0.12s ease,
+		box-shadow 0.12s ease;
 }
 
 .btn:hover {
 	transform: translateY(-1px);
-	border-color: rgba(255, 255, 255, 0.25);
-	background: rgba(255, 255, 255, 0.06);
+	border-color: rgba(139, 0, 0, 0.8);
+	background: rgba(139, 0, 0, 0.25);
+	box-shadow: 0 0 20px rgba(139, 0, 0, 0.6);
 }
 
 .btn.primary {
-	border-color: rgba(121, 255, 225, 0.28);
-	background: linear-gradient(135deg, rgba(121, 255, 225, 0.18), rgba(167, 139, 250, 0.12));
+	border-color: rgba(139, 0, 0, 0.7);
+	background: linear-gradient(135deg, rgba(139, 0, 0, 0.4), rgba(80, 0, 0, 0.3));
+	box-shadow: 0 4px 15px rgba(139, 0, 0, 0.5);
 }
 
 .meta {
@@ -257,17 +298,17 @@ a:hover {
 	font-size: 12px;
 	padding: 6px 10px;
 	border-radius: 999px;
-	border: 1px solid rgba(255, 255, 255, 0.14);
-	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(139, 0, 0, 0.4);
+	background: rgba(139, 0, 0, 0.1);
 	color: var(--muted);
 }
 
 .hero-card {
 	border-radius: var(--radius);
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	border: 1px solid rgba(139, 0, 0, 0.5);
 	background:
-		linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03)),
-		radial-gradient(900px 340px at 40% 0%, rgba(121, 255, 225, 0.10), rgba(121, 255, 225, 0));
+		linear-gradient(180deg, rgba(139, 0, 0, 0.2), rgba(80, 0, 0, 0.1)),
+		radial-gradient(900px 340px at 40% 0%, rgba(139, 0, 0, 0.25), rgba(139, 0, 0, 0));
 	box-shadow: var(--shadow);
 	overflow: hidden;
 }
@@ -286,7 +327,7 @@ a:hover {
 }
 
 .card-metrics {
-	border-top: 1px solid rgba(255, 255, 255, 0.10);
+	border-top: 1px solid rgba(139, 0, 0, 0.35);
 	padding: 14px 18px 18px;
 	display: grid;
 	gap: 12px;
@@ -330,13 +371,14 @@ a:hover {
 
 .card {
 	border-radius: var(--radius);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(139, 0, 0, 0.4);
+	background: rgba(139, 0, 0, 0.12);
 	padding: 16px;
+	box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
 }
 
 .card.subtle {
-	background: rgba(255, 255, 255, 0.03);
+	background: rgba(139, 0, 0, 0.08);
 }
 
 .card h3 {
@@ -363,8 +405,8 @@ a:hover {
 	font-size: 12px;
 	padding: 6px 10px;
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.03);
-	border: 1px solid rgba(255, 255, 255, 0.10);
+	background: rgba(139, 0, 0, 0.1);
+	border: 1px solid rgba(139, 0, 0, 0.35);
 	color: var(--muted);
 }
 
@@ -386,8 +428,8 @@ a:hover {
 
 .embed-card {
 	border-radius: var(--radius);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(139, 0, 0, 0.45);
+	background: rgba(139, 0, 0, 0.1);
 	overflow: hidden;
 	box-shadow: var(--shadow);
 }
@@ -398,8 +440,8 @@ a:hover {
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+	border-bottom: 1px solid rgba(139, 0, 0, 0.35);
+	background: linear-gradient(180deg, rgba(139, 0, 0, 0.18), rgba(80, 0, 0, 0.1));
 }
 
 .embed-title h3 {
@@ -415,8 +457,8 @@ a:hover {
 .embed-link {
 	padding: 8px 10px;
 	border-radius: 10px;
-	border: 1px solid rgba(255, 255, 255, 0.14);
-	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(139, 0, 0, 0.5);
+	background: rgba(139, 0, 0, 0.15);
 	color: var(--muted);
 	font-family: var(--mono);
 	font-size: 12px;
@@ -431,9 +473,10 @@ a:hover {
 
 .embed-link:hover {
 	transform: translateY(-1px);
-	border-color: rgba(255, 255, 255, 0.24);
-	background: rgba(255, 255, 255, 0.06);
+	border-color: rgba(139, 0, 0, 0.8);
+	background: rgba(139, 0, 0, 0.25);
 	color: var(--text);
+	box-shadow: 0 0 15px rgba(139, 0, 0, 0.5);
 }
 
 .embed-frame {
@@ -454,8 +497,8 @@ a:hover {
 
 .panel {
 	border-radius: var(--radius);
-	border: 1px solid rgba(255, 255, 255, 0.10);
-	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(139, 0, 0, 0.35);
+	background: rgba(139, 0, 0, 0.1);
 	padding: 16px;
 }
 
@@ -474,8 +517,8 @@ a:hover {
 .contact {
 	margin-top: 12px;
 	border-radius: var(--radius);
-	border: 1px solid rgba(255, 255, 255, 0.10);
-	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(139, 0, 0, 0.35);
+	background: rgba(139, 0, 0, 0.1);
 	padding: 16px;
 }
 
@@ -799,42 +842,63 @@ a:hover {
 /* Breach Mode - The "Infected" State */
 body.breach-mode {
 	--bg: #000000;
-	--bg-2: #1a0000;
-	--text: #ff3c3c;
-	--muted: #a00000;
+	--bg-2: #0a0000;
+	--text: #8b0000;
+	--muted: #660000;
 	--accent: #ff0000;
-	--accent-2: #550000;
-	--panel: rgba(50, 0, 0, 0.2);
-	--border: rgba(255, 0, 0, 0.4);
+	--accent-2: #330000;
+	--panel: rgba(139, 0, 0, 0.2);
+	--border: rgba(139, 0, 0, 0.6);
 
 	background:
 		linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-		linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+		linear-gradient(90deg, rgba(139, 0, 0, 0.1), rgba(0, 0, 0, 0.05), rgba(80, 0, 0, 0.1));
 	background-size: 100% 2px, 3px 100%;
 	font-family: 'Courier New', Courier, monospace;
+	animation: breach-pulse 2s ease-in-out infinite;
+}
+
+@keyframes breach-pulse {
+	0%, 100% {
+		filter: brightness(1) hue-rotate(0deg);
+	}
+	50% {
+		filter: brightness(0.8) hue-rotate(-10deg);
+	}
 }
 
 body.breach-mode .portrait {
-	filter: invert(1) contrast(2);
+	filter: grayscale(1) contrast(3) brightness(0.3) invert(1);
+	animation: portrait-distort 1s ease-in-out infinite;
+}
+
+@keyframes portrait-distort {
+	0%, 100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05) rotate(1deg);
+	}
 }
 
 body.breach-mode h1,
 body.breach-mode h2,
 body.breach-mode h3 {
 	text-transform: uppercase;
-	letter-spacing: 0.1em;
-	animation: glitch-rgb 0.2s infinite;
+	letter-spacing: 0.15em;
+	animation: glitch-rgb 0.15s infinite;
 }
 
 body.breach-mode .btn {
-	border-color: red;
-	color: red;
-	background: #1a0000;
+	border-color: #8b0000;
+	color: #8b0000;
+	background: #0a0000;
 }
 
 body.breach-mode .btn:hover {
-	background: red;
+	background: #8b0000;
 	color: black;
+	box-shadow: 0 0 30px rgba(139, 0, 0, 0.8);
 }
 
 /* Glitch Utility Classes */
@@ -892,34 +956,45 @@ body.breach-mode .btn:hover {
 	left: 0;
 	width: 100vw;
 	height: 100vh;
-	background: rgba(0, 0, 0, 0.95);
+	background: rgba(0, 0, 0, 0.98);
 	z-index: 9999;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	font-family: 'Fira Mono', monospace;
-	color: #0f0;
+	color: #8b0000;
 }
 
 .terminal-window {
 	width: 800px;
 	height: 600px;
 	background: #000;
-	border: 2px solid #0f0;
+	border: 2px solid #8b0000;
 	padding: 20px;
 	overflow-y: auto;
-	box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+	box-shadow: 0 0 30px rgba(139, 0, 0, 0.7), inset 0 0 50px rgba(139, 0, 0, 0.1);
+	animation: terminal-flicker 0.15s infinite;
+}
+
+@keyframes terminal-flicker {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.97;
+	}
 }
 
 .terminal-line {
 	margin: 5px 0;
 	white-space: pre-wrap;
+	text-shadow: 0 0 5px rgba(139, 0, 0, 0.8);
 }
 
 .terminal-input {
 	background: transparent;
 	border: none;
-	color: #0f0;
+	color: #8b0000;
 	font-family: inherit;
 	font-size: inherit;
 	width: 100%;
@@ -928,5 +1003,138 @@ body.breach-mode .btn:hover {
 
 .terminal-prompt::before {
 	content: "> ";
-	color: #0f0;
+	color: #8b0000;
+}
+
+/* ─── Dark Horror Atmosphere Effects ─────────────────────────────────────── */
+
+/* Floating shadow entities */
+@keyframes float-shadow {
+	0%, 100% {
+		transform: translate(0, 0) scale(1);
+		opacity: 0.3;
+	}
+	33% {
+		transform: translate(-30px, -40px) scale(1.1);
+		opacity: 0.2;
+	}
+	66% {
+		transform: translate(20px, 30px) scale(0.9);
+		opacity: 0.25;
+	}
+}
+
+body::before {
+	content: '';
+	position: fixed;
+	top: 10%;
+	left: 15%;
+	width: 200px;
+	height: 200px;
+	background: radial-gradient(circle, rgba(139, 0, 0, 0.3), transparent 70%);
+	border-radius: 50%;
+	filter: blur(40px);
+	animation: float-shadow 15s ease-in-out infinite;
+	pointer-events: none;
+	z-index: 1;
+}
+
+body::after {
+	content: '';
+	position: fixed;
+	bottom: 20%;
+	right: 10%;
+	width: 250px;
+	height: 250px;
+	background: radial-gradient(circle, rgba(80, 0, 0, 0.25), transparent 70%);
+	border-radius: 50%;
+	filter: blur(50px);
+	animation: float-shadow 20s ease-in-out infinite reverse;
+	pointer-events: none;
+	z-index: 1;
+}
+
+/* Scanline effect */
+.app::before {
+	content: '';
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: repeating-linear-gradient(
+		0deg,
+		rgba(0, 0, 0, 0.15) 0px,
+		rgba(0, 0, 0, 0) 1px,
+		rgba(0, 0, 0, 0) 2px,
+		rgba(0, 0, 0, 0.15) 3px
+	);
+	pointer-events: none;
+	z-index: 9998;
+	opacity: 0.3;
+	animation: scan 8s linear infinite;
+}
+
+@keyframes scan {
+	0% {
+		transform: translateY(0);
+	}
+	100% {
+		transform: translateY(10px);
+	}
+}
+
+/* Random glitch on headings */
+h1, h2, h3 {
+	position: relative;
+	text-shadow: 2px 2px 4px rgba(139, 0, 0, 0.5);
+}
+
+h1::after, h2::after {
+	content: attr(data-text);
+	position: absolute;
+	left: 2px;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	color: #8b0000;
+	animation: glitch-appear 10s infinite;
+}
+
+@keyframes glitch-appear {
+	0%, 90%, 100% {
+		opacity: 0;
+		left: 2px;
+	}
+	91% {
+		opacity: 0.7;
+		left: -2px;
+	}
+	92% {
+		opacity: 0.8;
+		left: 3px;
+	}
+	93% {
+		opacity: 0;
+		left: 2px;
+	}
+}
+
+/* Creepy vignette */
+.content::before {
+	content: '';
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: radial-gradient(
+		ellipse at center,
+		transparent 0%,
+		transparent 50%,
+		rgba(0, 0, 0, 0.4) 100%
+	);
+	pointer-events: none;
+	z-index: 9997;
 }

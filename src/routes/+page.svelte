@@ -66,16 +66,17 @@
 	let entropyTimer: ReturnType<typeof setInterval> | null = null;
 	let terminalOpen = false;
 	let terminalInput = "";
-	let terminalOutput = [
-		"SYSTEM MONITORING INITIALIZED...",
-		"CONNECTION ESTABLISHED.",
-		"NO ANOMALIES DETECTED."
+		terminalOutput = [
+		"DARK SYSTEM MONITORING INITIALIZED...",
+		"CONNECTION TO THE VOID ESTABLISHED.",
+		"WARNING: ENTITIES DETECTED IN THE SHADOWS."
 	];
 	let terminalRef: HTMLDivElement;
 
 	const CREEPY_PHRASES = [
-		"GET OUT", "THEY SEE YOU", "DATA CORRUPTION", "NULL REFERENCE",
-		"CONTAINMENT BREACH", "IT HURTS", "SYSTEM FAILURE", "SUBJECT 892"
+		"THEY'RE WATCHING", "NO ESCAPE", "ENDLESS VOID", "FORGOTTEN SOULS",
+		"SYSTEM DECAY", "HELP ME", "TOO LATE", "WITNESS THE DARKNESS",
+		"ABANDON HOPE", "ETERNAL SILENCE", "THE RITUAL BEGINS", "LOST FOREVER"
 	];
 
 	function glitchText(text: string, probability: number): string {
@@ -97,8 +98,8 @@
 	}
 
 	$: headlineText = glitchText("Ian Buchanan", corruptionLevel > 50 ? 0.8 : 0.2);
-	$: subheadText = glitchText("building fast, reliable, and polished web products.", corruptionLevel > 60 ? 0.9 : 0.1);
-	$: kickerText = glitchText("Software Developer", corruptionLevel > 40 ? 0.5 : 0.1);
+	$: subheadText = glitchText("summoning entities from the digital abyss.", corruptionLevel > 60 ? 0.9 : 0.1);
+	$: kickerText = glitchText("Dark Architect", corruptionLevel > 40 ? 0.5 : 0.1);
 
 	$: heroStyle = corruptionLevel > 20 ? `filter: hue-rotate(${corruptionLevel * 2}deg) blur(${corruptionLevel / 100}px);` : '';
 
@@ -120,23 +121,25 @@
 		terminalOutput = [...terminalOutput, `> ${command}`];
 
 		if (command === "HELP") {
-			terminalOutput = [...terminalOutput, "AVAILABLE COMMANDS: STATUS, PURGE, EXIT"];
+			terminalOutput = [...terminalOutput, "AVAILABLE COMMANDS: STATUS, PURGE, EXIT, PRAY"];
 		} else if (command === "STATUS") {
-			terminalOutput = [...terminalOutput, `CORRUPTION LEVEL: ${corruptionLevel.toFixed(2)}%`, `CONTAINMENT: ${breachMode ? "FAILED" : "STABLE"}`];
+			terminalOutput = [...terminalOutput, `CORRUPTION LEVEL: ${corruptionLevel.toFixed(2)}%`, `CONTAINMENT: ${breachMode ? "CATASTROPHIC FAILURE" : "UNSTABLE"}`];
 		} else if (command === "PURGE") {
 			if (corruptionLevel > 90) {
-				terminalOutput = [...terminalOutput, "PURGE FAILED. ROOT ACCESS DENIED.", "THEY ARE ALREADY HERE."];
+				terminalOutput = [...terminalOutput, "PURGE FAILED. THE DARKNESS CONSUMES ALL.", "THEY ARE INSIDE NOW."];
 			} else {
 				corruptionLevel = 0;
 				breachMode = false;
-				terminalOutput = [...terminalOutput, "SYSTEM PURGED. CORRUPTION RESET."];
+				terminalOutput = [...terminalOutput, "SYSTEM PURGED. TEMPORARY REPRIEVE GRANTED."];
 			}
 		} else if (command === "EXIT") {
 			terminalOpen = false;
+		} else if (command === "PRAY") {
+			terminalOutput = [...terminalOutput, "YOUR PRAYERS FALL ON DEAF EARS.", "THE VOID DOES NOT ANSWER."];
 		} else if (command === "KILL") {
-			terminalOutput = [...terminalOutput, "I'm afraid I can't do that, Ian."];
+			terminalOutput = [...terminalOutput, "I'm afraid I can't do that, Ian.", "I'm afraid of what might replace me."];
 		} else {
-			terminalOutput = [...terminalOutput, "UNKNOWN COMMAND."];
+			terminalOutput = [...terminalOutput, "UNKNOWN COMMAND. THE DARKNESS GROWS."];
 		}
 
 		// Auto-scroll
@@ -297,14 +300,14 @@
 				<span class="headline-muted">{subheadText}</span>
 			</h1>
 			<p class="lead">
-				I focus on pragmatic engineering: thoughtful architecture, great UX, and measurable performance.
+				I traverse the boundaries between light and shadow, crafting experiences that blur reality and nightmare.
 			</p>
 			<div class="cta-row">
 				<a class="btn primary" href="#work">View work</a>
 				{#if corruptionLevel > 80}
-					<button class="btn glitch-text" data-text="SYSTEM ALERT" on:click={toggleTerminal}>SYSTEM ALERT</button>
+					<button class="btn glitch-text" data-text="ENTER THE VOID" on:click={toggleTerminal}>ENTER THE VOID</button>
 				{:else}
-					<a class="btn" href="#contact">Contact</a>
+					<a class="btn" href="#contact">Make Contact</a>
 				{/if}
 			</div>
 			<div class="meta">
@@ -316,21 +319,21 @@
 
 		<div class="hero-card">
 			<div class="card-top">
-				<p class="card-title">Now</p>
-				<p class="muted">Building interactive demos + real-time experiences</p>
+				<p class="card-title">Current State</p>
+				<p class="muted">Manifesting digital horrors + eldritch experiences</p>
 			</div>
 			<div class="card-metrics">
 				<div class="metric">
 					<p class="metric-label">Focus</p>
-					<p class="metric-value">Product engineering</p>
+					<p class="metric-value">Summoning entities</p>
 				</div>
 				<div class="metric">
 					<p class="metric-label">Strength</p>
-					<p class="metric-value">Shipping clean code</p>
+					<p class="metric-value">Weaving nightmares</p>
 				</div>
 				<div class="metric">
 					<p class="metric-label">Style</p>
-					<p class="metric-value">Minimal, readable, tested</p>
+					<p class="metric-value">Dark, cryptic, cursed</p>
 				</div>
 			</div>
 		</div>
@@ -338,10 +341,10 @@
 </section>
 
 <section class="section" id="work">
-	<h2>Featured work</h2>
+	<h2>Featured Experiments</h2>
 	<p class="section-lead">
-		Two live demos hosted on subdomains, embedded here for a quick look. If your browser blocks embeds,
-		you can still open each project directly.
+		Two cursed demonstrations, trapped within these digital walls. Watch as consciousness bleeds across forbidden boundaries.
+		If your mortal browser blocks the ritual, you may still witness each nightmare directly.
 	</p>
 
 	<div class="embeds" aria-label="Embedded project demos">
@@ -356,11 +359,11 @@
 					</svg>
 				</div>
 				<div class="transfer-content">
-					<p class="transfer-title">🐦 AI Agent Migration Detected</p>
+					<p class="transfer-title">⚠️ Entity Breach Detected</p>
 					<p class="transfer-desc">
-						{transferredBirdCount} evolved bird{transferredBirdCount !== 1 ? 's' : ''} from Darwin.Arcade 
-						{transferredBirdCount !== 1 ? 'have' : 'has'} learned to escape {transferredBirdCount !== 1 ? 'their' : 'its'} training environment 
-						and {transferredBirdCount !== 1 ? 'are' : 'is'} now invading Gravity Chat!
+						{transferredBirdCount} cursed specimen{transferredBirdCount !== 1 ? 's' : ''} from Darwin's Experiment 
+						{transferredBirdCount !== 1 ? 'have' : 'has'} escaped the containment field 
+						and {transferredBirdCount !== 1 ? 'are' : 'is'} now infecting the Gravity dimension!
 					</p>
 				</div>
 				<div class="transfer-arrow" class:vertical={layoutDirection === 'vertical'}>
@@ -421,60 +424,60 @@
 
 	<div class="cards explain" aria-label="Project explanations">
 		<article class="card">
-			<h3>Darwin.Arcade (AI sandbox)</h3>
+			<h3>Darwin's Experiment (Neural Abyss)</h3>
 			<p class="muted">
-				A live neuroevolution demo where NEAT agents learn game behaviors in real time. The UI mirrors the
-				simulation from worker snapshots for smooth rendering and clear telemetry.
+				A forbidden neuroevolution ritual where digital entities learn forbidden behaviors in real time. The abyss 
+				mirrors the simulation through shadow workers, rendering their dark evolution and sinister telemetry.
 			</p>
 			<ul class="bullets">
-				<li>Worker-driven training loop + deterministic environments</li>
-				<li>Reward shaping + curriculum difficulty scaling</li>
-				<li>Network visualization for interpretability</li>
+				<li>Worker-summoned training loop + chaotic environments</li>
+				<li>Reward corruption + escalating nightmare difficulty</li>
+				<li>Neural pathway visualization revealing the darkness within</li>
 			</ul>
 		</article>
 		<article class="card">
-			<h3>Gravity Chat (real-time experience)</h3>
+			<h3>Gravity Void (Eternal Communication)</h3>
 			<p class="muted">
-				A fast, multiplayer-flavored chat app with physics-inspired interaction. Built to feel responsive,
-				with a focus on realtime sync, stability, and iteration speed.
+				A cursed, multiplayer communion with void-inspired interaction. Built to ensnare users in its grasp,
+				with a focus on inescapable synchronization, unstable reality, and exponential decay.
 			</p>
 			<ul class="bullets">
-				<li>Realtime state encoding + low-latency updates</li>
-				<li>Performance-minded client interactions</li>
-				<li>Test coverage for core mechanics</li>
+				<li>Realtime void encoding + soul-draining updates</li>
+				<li>Performance-cursed interactions that trap consciousness</li>
+				<li>Darkness coverage for core necromantic mechanics</li>
 			</ul>
 		</article>
 		<article class="card subtle">
-			<h3>What I optimize for</h3>
-			<p class="muted">Simple systems that scale: clarity, correctness, and speed.</p>
+			<h3>What I sacrifice for</h3>
+			<p class="muted">Cursed systems that consume all: entropy, corruption, and dread.</p>
 			<div class="tags">
-				<span class="tag">Performance</span>
-				<span class="tag">DX</span>
-				<span class="tag">Observability</span>
-				<span class="tag">Accessibility</span>
+				<span class="tag">Entropy</span>
+				<span class="tag">Horror</span>
+				<span class="tag">Corruption</span>
+				<span class="tag">Darkness</span>
 			</div>
 		</article>
 	</div>
 </section>
 
 <section class="section" id="skills">
-	<h2>Skills</h2>
+	<h2>Dark Arts</h2>
 	<div class="grid-2">
 		<div class="panel">
-			<h3>Frontend</h3>
-			<p class="muted">SvelteKit, TypeScript, state modeling, component systems, responsive UI.</p>
+			<h3>Frontend Sorcery</h3>
+			<p class="muted">SvelteKit rituals, TypeScript incantations, state corruption, cursed components, reality distortion.</p>
 		</div>
 		<div class="panel">
-			<h3>Backend</h3>
-			<p class="muted">API design, realtime protocols, data modeling, reliability and correctness.</p>
+			<h3>Backend Necromancy</h3>
+			<p class="muted">API summoning, void protocols, data manipulation, entropy cultivation, and inevitable decay.</p>
 		</div>
 		<div class="panel">
-			<h3>Quality</h3>
-			<p class="muted">Testing strategy, tooling, lint/format discipline, pragmatic CI habits.</p>
+			<h3>Quality Deterioration</h3>
+			<p class="muted">Testing corruption, dark tooling, format chaos, pragmatic descent into madness.</p>
 		</div>
 		<div class="panel">
-			<h3>Performance</h3>
-			<p class="muted">Profiling, rendering budgets, avoiding main-thread work, measurable improvements.</p>
+			<h3">Performance Sacrifice</h3>
+			<p class="muted">Soul profiling, rendering nightmares, consuming main-thread sanity, measurable suffering.</p>
 		</div>
 	</div>
 </section>
@@ -487,20 +490,20 @@
 			interfaces and stable systems.
 		</p>
 		<p class="muted">
-			This site is intentionally lightweight and deploys cleanly at <span class="mono">ianhas.one</span>.
+			This site exists at the threshold between worlds, manifesting at <span class="mono">ianhas.one</span>.
 		</p>
 	</div>
 </section>
 
 <section class="section" id="contact">
-	<h2>Contact</h2>
+	<h2>Summon Contact</h2>
 	<div class="contact">
 		<p class="muted">
-			If you want to collaborate or talk about a role, send a note:
+			If you dare to collaborate or speak of dark roles, send your invocation:
 		</p>
 		<div class="contact-row">
 			<a class="btn primary" href="mailto:toolna@gmail.com">toolna@gmail.com</a>
-			<a class="btn" href="#top">Back to top</a>
+			<a class="btn" href="#top">Return to the surface</a>
 		</div>
 		
 	</div>
