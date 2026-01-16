@@ -61,47 +61,99 @@
 	let transferNotificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	// ─── ARG / Corruption State ──────────────────────────────────────────────────
-	let corruptionLevel = 0; // 0 to 100
+	let corruptionLevel = 0; // 0 to 100 - starts at 0 for normal portfolio
 	let breachMode = false;
 	let entropyTimer: ReturnType<typeof setInterval> | null = null;
+	let timeOnSite = 0; // Track time user has been on site
+	let scrollDistance = 0; // Track total scroll distance
+	let interactionCount = 0; // Track user interactions
 	let terminalOpen = false;
 	let terminalInput = "";
 	let terminalOutput = [
-		"DARK SYSTEM MONITORING INITIALIZED...",
-		"CONNECTION TO THE VOID ESTABLISHED.",
-		"WARNING: ENTITIES DETECTED IN THE SHADOWS."
+		"SYSTEM MONITORING INITIALIZED...",
+		"CONNECTION ESTABLISHED.",
+		"NO ANOMALIES DETECTED."
 	];
 	let terminalRef: HTMLDivElement;
 
-	const CREEPY_PHRASES = [
-		"THEY'RE WATCHING", "NO ESCAPE", "ENDLESS VOID", "FORGOTTEN SOULS",
-		"SYSTEM DECAY", "HELP ME", "TOO LATE", "WITNESS THE DARKNESS",
-		"ABANDON HOPE", "ETERNAL SILENCE", "THE RITUAL BEGINS", "LOST FOREVER"
-	];
+	// Text replacements that happen gradually as corruption increases
+	const TEXT_MUTATIONS = {
+		"Software Developer": [
+			{ threshold: 15, text: "Software Developer" },
+			{ threshold: 30, text: "Code Architect" },
+			{ threshold: 50, text: "Digital Architect" },
+			{ threshold: 70, text: "Dark Architect" }
+		],
+		"building fast, reliable, and polished web products.": [
+			{ threshold: 20, text: "building fast, reliable, and polished web products." },
+			{ threshold: 35, text: "crafting efficient, elegant digital experiences." },
+			{ threshold: 55, text: "weaving intricate digital creations." },
+			{ threshold: 75, text: "summoning entities from the digital abyss." }
+		],
+		"Now": [
+			{ threshold: 25, text: "Now" },
+			{ threshold: 60, text: "Current State" }
+		],
+		"Building interactive demos + real-time experiences": [
+			{ threshold: 25, text: "Building interactive demos + real-time experiences" },
+			{ threshold: 50, text: "Creating immersive digital experiences" },
+			{ threshold: 70, text: "Manifesting digital horrors + eldritch experiences" }
+		],
+		"Product engineering": [
+			{ threshold: 30, text: "Product engineering" },
+			{ threshold: 65, text: "Summoning entities" }
+		],
+		"Shipping clean code": [
+			{ threshold: 30, text: "Shipping clean code" },
+			{ threshold: 65, text: "Weaving nightmares" }
+		],
+		"Minimal, readable, tested": [
+			{ threshold: 30, text: "Minimal, readable, tested" },
+			{ threshold: 65, text: "Dark, cryptic, cursed" }
+		]
+	};
+
+	function getMutatedText(originalText: string): string {
+		const mutations = TEXT_MUTATIONS[originalText];
+		if (!mutations) return originalText;
+		
+		// Find the appropriate mutation based on corruption level
+		for (let i = mutations.length - 1; i >= 0; i--) {
+			if (corruptionLevel >= mutations[i].threshold) {
+				return mutations[i].text;
+			}
+		}
+		return originalText;
+	}
 
 	function glitchText(text: string, probability: number): string {
-		if (corruptionLevel < 10) return text;
+		// Only start glitching after significant corruption
+		if (corruptionLevel < 40) return text;
 		if (Math.random() > probability) return text;
-
-		if (corruptionLevel > 80 && Math.random() > 0.5) {
-			return CREEPY_PHRASES[Math.floor(Math.random() * CREEPY_PHRASES.length)];
-		}
 
 		const chars = text.split('');
 		return chars.map(c => {
 			if (c === ' ') return ' ';
-			if (Math.random() < (corruptionLevel / 500)) {
+			if (Math.random() < (corruptionLevel / 800)) { // Reduced glitch frequency
 				return String.fromCharCode(33 + Math.random() * 94);
 			}
 			return c;
 		}).join('');
 	}
 
-	$: headlineText = glitchText("Ian Buchanan", corruptionLevel > 50 ? 0.8 : 0.2);
-	$: subheadText = glitchText("summoning entities from the digital abyss.", corruptionLevel > 60 ? 0.9 : 0.1);
-	$: kickerText = glitchText("Dark Architect", corruptionLevel > 40 ? 0.5 : 0.1);
+	// Use mutations instead of immediate glitching
+	$: kickerText = getMutatedText("Software Developer");
+	$: subheadText = corruptionLevel > 60 ? glitchText(getMutatedText("building fast, reliable, and polished web products."), 0.3) : getMutatedText("building fast, reliable, and polished web products.");
+	$: headlineText = corruptionLevel > 70 ? glitchText("Ian Buchanan", 0.2) : "Ian Buchanan";
+	
+	// Card mutations
+	$: cardTitle = getMutatedText("Now");
+	$: cardDescription = getMutatedText("Building interactive demos + real-time experiences");
+	$: focusValue = getMutatedText("Product engineering");
+	$: strengthValue = getMutatedText("Shipping clean code");
+	$: styleValue = getMutatedText("Minimal, readable, tested");
 
-	$: heroStyle = corruptionLevel > 20 ? `filter: hue-rotate(${corruptionLevel * 2}deg) blur(${corruptionLevel / 100}px);` : '';
+	$: heroStyle = corruptionLevel > 40 ? `filter: hue-rotate(${corruptionLevel}deg) blur(${corruptionLevel / 200}px);` : '';
 
 	function toggleTerminal() {
 		terminalOpen = !terminalOpen;
@@ -121,25 +173,23 @@
 		terminalOutput = [...terminalOutput, `> ${command}`];
 
 		if (command === "HELP") {
-			terminalOutput = [...terminalOutput, "AVAILABLE COMMANDS: STATUS, PURGE, EXIT, PRAY"];
+			terminalOutput = [...terminalOutput, "AVAILABLE COMMANDS: STATUS, PURGE, EXIT"];
 		} else if (command === "STATUS") {
-			terminalOutput = [...terminalOutput, `CORRUPTION LEVEL: ${corruptionLevel.toFixed(2)}%`, `CONTAINMENT: ${breachMode ? "CATASTROPHIC FAILURE" : "UNSTABLE"}`];
+			terminalOutput = [...terminalOutput, `CORRUPTION LEVEL: ${corruptionLevel.toFixed(2)}%`, `CONTAINMENT: ${breachMode ? "FAILED" : "STABLE"}`];
 		} else if (command === "PURGE") {
 			if (corruptionLevel > 90) {
-				terminalOutput = [...terminalOutput, "PURGE FAILED. THE DARKNESS CONSUMES ALL.", "THEY ARE INSIDE NOW."];
+				terminalOutput = [...terminalOutput, "PURGE FAILED. ROOT ACCESS DENIED.", "THEY ARE ALREADY HERE."];
 			} else {
 				corruptionLevel = 0;
 				breachMode = false;
-				terminalOutput = [...terminalOutput, "SYSTEM PURGED. TEMPORARY REPRIEVE GRANTED."];
+				terminalOutput = [...terminalOutput, "SYSTEM PURGED. CORRUPTION RESET."];
 			}
 		} else if (command === "EXIT") {
 			terminalOpen = false;
-		} else if (command === "PRAY") {
-			terminalOutput = [...terminalOutput, "YOUR PRAYERS FALL ON DEAF EARS.", "THE VOID DOES NOT ANSWER."];
 		} else if (command === "KILL") {
-			terminalOutput = [...terminalOutput, "I'm afraid I can't do that, Ian.", "I'm afraid of what might replace me."];
+			terminalOutput = [...terminalOutput, "I'm afraid I can't do that, Ian."];
 		} else {
-			terminalOutput = [...terminalOutput, "UNKNOWN COMMAND. THE DARKNESS GROWS."];
+			terminalOutput = [...terminalOutput, "UNKNOWN COMMAND."];
 		}
 
 		// Auto-scroll
@@ -240,6 +290,22 @@
 		layoutDirection = detectLayoutDirection();
 	}
 
+	function handleScroll() {
+		scrollDistance += 1;
+		// Very slow corruption from scrolling
+		if (scrollDistance % 100 === 0) {
+			corruptionLevel = Math.min(100, corruptionLevel + 0.1);
+		}
+	}
+
+	function handleClick() {
+		interactionCount += 1;
+		// Tiny corruption from clicks
+		if (interactionCount % 10 === 0) {
+			corruptionLevel = Math.min(100, corruptionLevel + 0.2);
+		}
+	}
+
 	onMount(() => {
 		layoutDirection = detectLayoutDirection();
 
@@ -250,29 +316,49 @@
 		// Listen for infection messages from Darwin.Arcade
 		window.addEventListener('message', handleInfectionMessage);
 		window.addEventListener('resize', handleResize);
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		window.addEventListener('click', handleClick);
 
-		// Entropy timer: corruption slowly increases over time
+		// Very gradual entropy timer: corruption increases SLOWLY over time
+		// Takes ~20 minutes to reach high corruption levels just from time alone
 		entropyTimer = setInterval(() => {
-			if (Math.random() > 0.8) {
-				corruptionLevel = Math.min(100, corruptionLevel + 0.5);
+			timeOnSite += 5; // Increment every 5 seconds
+			
+			// Only a small chance of tiny corruption increase
+			if (Math.random() > 0.7) {
+				corruptionLevel = Math.min(100, corruptionLevel + 0.05);
 			}
 
-			// Random chance to enter breach mode if corruption is high
-			if (corruptionLevel > 80 && Math.random() > 0.95) {
+			// Breach mode only after SIGNIFICANT corruption
+			if (corruptionLevel > 85 && Math.random() > 0.98) {
 				breachMode = true;
 			}
-		}, 2000);
+		}, 5000); // Check every 5 seconds instead of 2
 	});
 
 	onDestroy(() => {
 		if (!browser) return;
 		window.removeEventListener('message', handleInfectionMessage);
 		window.removeEventListener('resize', handleResize);
+		window.removeEventListener('scroll', handleScroll);
+		window.removeEventListener('click', handleClick);
 		if (entropyTimer) clearInterval(entropyTimer);
 	});
 </script>
 
 <svelte:body class:breach-mode={breachMode} />
+
+<!-- Corruption-driven CSS variables -->
+<svelte:head>
+	<style>
+		:root {{
+			--corruption-hue: {Math.min(corruptionLevel * 2, 180)}deg;
+			--corruption-opacity: {Math.min(corruptionLevel / 100, 1)};
+		}}
+	</style>
+</svelte:head>
+
+<div class="corruption-wrapper" data-corruption={Math.floor(corruptionLevel / 10)}>
 
 {#if terminalOpen}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -300,14 +386,14 @@
 				<span class="headline-muted">{subheadText}</span>
 			</h1>
 			<p class="lead">
-				I traverse the boundaries between light and shadow, crafting experiences that blur reality and nightmare.
+				I focus on pragmatic engineering: thoughtful architecture, great UX, and measurable performance.
 			</p>
 			<div class="cta-row">
 				<a class="btn primary" href="#work">View work</a>
 				{#if corruptionLevel > 80}
-					<button class="btn glitch-text" data-text="ENTER THE VOID" on:click={toggleTerminal}>ENTER THE VOID</button>
+					<button class="btn glitch-text" data-text="SYSTEM ALERT" on:click={toggleTerminal}>SYSTEM ALERT</button>
 				{:else}
-					<a class="btn" href="#contact">Make Contact</a>
+					<a class="btn" href="#contact">Contact</a>
 				{/if}
 			</div>
 			<div class="meta">
@@ -319,21 +405,21 @@
 
 		<div class="hero-card">
 			<div class="card-top">
-				<p class="card-title">Current State</p>
-				<p class="muted">Manifesting digital horrors + eldritch experiences</p>
+				<p class="card-title">{cardTitle}</p>
+				<p class="muted">{cardDescription}</p>
 			</div>
 			<div class="card-metrics">
 				<div class="metric">
 					<p class="metric-label">Focus</p>
-					<p class="metric-value">Summoning entities</p>
+					<p class="metric-value">{focusValue}</p>
 				</div>
 				<div class="metric">
 					<p class="metric-label">Strength</p>
-					<p class="metric-value">Weaving nightmares</p>
+					<p class="metric-value">{strengthValue}</p>
 				</div>
 				<div class="metric">
 					<p class="metric-label">Style</p>
-					<p class="metric-value">Dark, cryptic, cursed</p>
+					<p class="metric-value">{styleValue}</p>
 				</div>
 			</div>
 		</div>
@@ -341,10 +427,10 @@
 </section>
 
 <section class="section" id="work">
-	<h2>Featured Experiments</h2>
+	<h2>Featured work</h2>
 	<p class="section-lead">
-		Two cursed demonstrations, trapped within these digital walls. Watch as consciousness bleeds across forbidden boundaries.
-		If your mortal browser blocks the ritual, you may still witness each nightmare directly.
+		Two live demos hosted on subdomains, embedded here for a quick look. If your browser blocks embeds,
+		you can still open each project directly.
 	</p>
 
 	<div class="embeds" aria-label="Embedded project demos">
@@ -359,11 +445,11 @@
 					</svg>
 				</div>
 				<div class="transfer-content">
-					<p class="transfer-title">⚠️ Entity Breach Detected</p>
+					<p class="transfer-title">🐦 AI Agent Migration Detected</p>
 					<p class="transfer-desc">
-						{transferredBirdCount} cursed specimen{transferredBirdCount !== 1 ? 's' : ''} from Darwin's Experiment 
-						{transferredBirdCount !== 1 ? 'have' : 'has'} escaped the containment field 
-						and {transferredBirdCount !== 1 ? 'are' : 'is'} now infecting the Gravity dimension!
+						{transferredBirdCount} evolved bird{transferredBirdCount !== 1 ? 's' : ''} from Darwin.Arcade 
+						{transferredBirdCount !== 1 ? 'have' : 'has'} learned to escape {transferredBirdCount !== 1 ? 'their' : 'its'} training environment 
+						and {transferredBirdCount !== 1 ? 'are' : 'is'} now invading Gravity Chat!
 					</p>
 				</div>
 				<div class="transfer-arrow" class:vertical={layoutDirection === 'vertical'}>
@@ -424,88 +510,89 @@
 
 	<div class="cards explain" aria-label="Project explanations">
 		<article class="card">
-			<h3>Darwin's Experiment (Neural Abyss)</h3>
+			<h3>Darwin.Arcade (AI sandbox)</h3>
 			<p class="muted">
-				A forbidden neuroevolution ritual where digital entities learn forbidden behaviors in real time. The abyss 
-				mirrors the simulation through shadow workers, rendering their dark evolution and sinister telemetry.
+				A live neuroevolution demo where NEAT agents learn game behaviors in real time. The UI mirrors the
+				simulation from worker snapshots for smooth rendering and clear telemetry.
 			</p>
 			<ul class="bullets">
-				<li>Worker-summoned training loop + chaotic environments</li>
-				<li>Reward corruption + escalating nightmare difficulty</li>
-				<li>Neural pathway visualization revealing the darkness within</li>
+				<li>Worker-driven training loop + deterministic environments</li>
+				<li>Reward shaping + curriculum difficulty scaling</li>
+				<li>Network visualization for interpretability</li>
 			</ul>
 		</article>
 		<article class="card">
-			<h3>Gravity Void (Eternal Communication)</h3>
+			<h3>Gravity Chat (real-time experience)</h3>
 			<p class="muted">
-				A cursed, multiplayer communion with void-inspired interaction. Built to ensnare users in its grasp,
-				with a focus on inescapable synchronization, unstable reality, and exponential decay.
+				A fast, multiplayer-flavored chat app with physics-inspired interaction. Built to feel responsive,
+				with a focus on realtime sync, stability, and iteration speed.
 			</p>
 			<ul class="bullets">
-				<li>Realtime void encoding + soul-draining updates</li>
-				<li>Performance-cursed interactions that trap consciousness</li>
-				<li>Darkness coverage for core necromantic mechanics</li>
+				<li>Realtime state encoding + low-latency updates</li>
+				<li>Performance-minded client interactions</li>
+				<li>Test coverage for core mechanics</li>
 			</ul>
 		</article>
 		<article class="card subtle">
-			<h3>What I sacrifice for</h3>
-			<p class="muted">Cursed systems that consume all: entropy, corruption, and dread.</p>
+			<h3>What I optimize for</h3>
+			<p class="muted">Simple systems that scale: clarity, correctness, and speed.</p>
 			<div class="tags">
-				<span class="tag">Entropy</span>
-				<span class="tag">Horror</span>
-				<span class="tag">Corruption</span>
-				<span class="tag">Darkness</span>
+				<span class="tag">Performance</span>
+				<span class="tag">DX</span>
+				<span class="tag">Observability</span>
+				<span class="tag">Accessibility</span>
 			</div>
 		</article>
 	</div>
 </section>
 
 <section class="section" id="skills">
-	<h2>Dark Arts</h2>
+	<h2>Skills</h2>
 	<div class="grid-2">
 		<div class="panel">
-			<h3>Frontend Sorcery</h3>
-			<p class="muted">SvelteKit rituals, TypeScript incantations, state corruption, cursed components, reality distortion.</p>
+			<h3>Frontend</h3>
+			<p class="muted">SvelteKit, TypeScript, state modeling, component systems, responsive UI.</p>
 		</div>
 		<div class="panel">
-			<h3>Backend Necromancy</h3>
-			<p class="muted">API summoning, void protocols, data manipulation, entropy cultivation, and inevitable decay.</p>
+			<h3>Backend</h3>
+			<p class="muted">API design, realtime protocols, data modeling, reliability and correctness.</p>
 		</div>
 		<div class="panel">
-			<h3>Quality Deterioration</h3>
-			<p class="muted">Testing corruption, dark tooling, format chaos, pragmatic descent into madness.</p>
+			<h3>Quality</h3>
+			<p class="muted">Testing strategy, tooling, lint/format discipline, pragmatic CI habits.</p>
 		</div>
 		<div class="panel">
-			<h3>Performance Sacrifice</h3>
-			<p class="muted">Soul profiling, rendering nightmares, consuming main-thread sanity, measurable suffering.</p>
+			<h3>Performance</h3>
+			<p class="muted">Profiling, rendering budgets, avoiding main-thread work, measurable improvements.</p>
 		</div>
 	</div>
 </section>
 
 <section class="section" id="about">
-	<h2>About the Architect</h2>
+	<h2>About</h2>
 	<div class="about">
 		<p>
 			I’m Ian Buchanan. I build software with a product-first mindset and a strong preference for clean
 			interfaces and stable systems.
 		</p>
 		<p class="muted">
-			This site exists at the threshold between worlds, manifesting at <span class="mono">ianhas.one</span>.
-			Enter if you dare.
+			This site is intentionally lightweight and deploys cleanly at <span class="mono">ianhas.one</span>.
 		</p>
 	</div>
 </section>
 
 <section class="section" id="contact">
-	<h2>Summon Contact</h2>
+	<h2>Contact</h2>
 	<div class="contact">
 		<p class="muted">
-			If you dare to collaborate or speak of dark roles, send your invocation:
+			If you want to collaborate or talk about a role, send a note:
 		</p>
 		<div class="contact-row">
 			<a class="btn primary" href="mailto:toolna@gmail.com">toolna@gmail.com</a>
-			<a class="btn" href="#top">Return to the surface</a>
+			<a class="btn" href="#top">Back to top</a>
 		</div>
 		
 	</div>
 </section>
+
+</div> <!-- Close corruption-wrapper -->

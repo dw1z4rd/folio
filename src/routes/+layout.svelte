@@ -9,9 +9,9 @@
 	const meseeksUrl = (env.PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
 	const gravityUrl = (env.PUBLIC_GRAVITY_URL ?? 'https://chat.ianhas.one').replace(/\/$/, '');
 
-	const title = 'Ian Buchanan — Dark Architect';
+	const title = 'Ian Buchanan — Software Developer';
 	const description =
-		'Dark portfolio of Ian Buchanan — architect of nightmares, weaver of cursed code, summoner of digital horrors from the void.';
+		'Portfolio of Ian Buchanan — software developer focused on building fast, reliable, well-designed web experiences.';
 </script>
 
 <svelte:head>
@@ -23,7 +23,7 @@
 	<meta property="og:description" content={description} />
 	<meta property="og:url" content={new URL(page.url.pathname, siteUrl).toString()} />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="theme-color" content="#0a0000" />
+	<meta name="theme-color" content="#0b0f1a" />
 </svelte:head>
 
 <div class="app">
