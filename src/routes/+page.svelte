@@ -2,6 +2,7 @@
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { env } from '$env/dynamic/public';
+	import { initLore } from '$lib/lore';
 
 	const aiUrl = (env.PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
 	const chatUrl = (env.PUBLIC_GRAVITY_URL ?? 'https://chat.ianhas.one').replace(/\/$/, '');
@@ -306,7 +307,12 @@
 		}
 	}
 
+	let loreCleanup: (() => void) | undefined;
+
 	onMount(() => {
+		// Initialize the hidden lore engine
+		loreCleanup = initLore(() => corruptionLevel);
+
 		layoutDirection = detectLayoutDirection();
 
 		// Find the iframes after mount
@@ -337,6 +343,7 @@
 	});
 
 	onDestroy(() => {
+		if (loreCleanup) loreCleanup();
 		if (!browser) return;
 		window.removeEventListener('message', handleInfectionMessage);
 		window.removeEventListener('resize', handleResize);
