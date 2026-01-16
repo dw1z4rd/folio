@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { env } from '$env/dynamic/public';
+	import { initLore } from '$lib/lore';
 
 	const aiUrl = (env.PUBLIC_MESEEKS_URL ?? 'https://ai.ianhas.one').replace(/\/$/, '');
 	const chatUrl = (env.PUBLIC_GRAVITY_URL ?? 'https://chat.ianhas.one').replace(/\/$/, '');
@@ -103,6 +104,144 @@
 	let transferredBirdCount = 0;
 	let transferNotificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
+	// ─── ARG / Corruption State ──────────────────────────────────────────────────
+	let corruptionLevel = 0; // 0 to 100 - starts at 0 for normal portfolio
+	let breachMode = false;
+	let entropyTimer: ReturnType<typeof setInterval> | null = null;
+	let timeOnSite = 0; // Track time user has been on site
+	let scrollDistance = 0; // Track total scroll distance
+	let interactionCount = 0; // Track user interactions
+	let terminalOpen = false;
+	let terminalInput = "";
+	let terminalOutput = [
+		"SYSTEM MONITORING INITIALIZED...",
+		"CONNECTION ESTABLISHED.",
+		"NO ANOMALIES DETECTED."
+	];
+	let terminalRef: HTMLDivElement;
+
+	// Text replacements that happen gradually as corruption increases
+	const TEXT_MUTATIONS = {
+		"Software Developer": [
+			{ threshold: 15, text: "Software Developer" },
+			{ threshold: 30, text: "Code Architect" },
+			{ threshold: 50, text: "Digital Architect" },
+			{ threshold: 70, text: "Dark Architect" }
+		],
+		"building fast, reliable, and polished web products.": [
+			{ threshold: 20, text: "building fast, reliable, and polished web products." },
+			{ threshold: 35, text: "crafting efficient, elegant digital experiences." },
+			{ threshold: 55, text: "weaving intricate digital creations." },
+			{ threshold: 75, text: "summoning entities from the digital abyss." }
+		],
+		"Now": [
+			{ threshold: 25, text: "Now" },
+			{ threshold: 60, text: "Current State" }
+		],
+		"Building interactive demos + real-time experiences": [
+			{ threshold: 25, text: "Building interactive demos + real-time experiences" },
+			{ threshold: 50, text: "Creating immersive digital experiences" },
+			{ threshold: 70, text: "Manifesting digital horrors + eldritch experiences" }
+		],
+		"Product engineering": [
+			{ threshold: 30, text: "Product engineering" },
+			{ threshold: 65, text: "Summoning entities" }
+		],
+		"Shipping clean code": [
+			{ threshold: 30, text: "Shipping clean code" },
+			{ threshold: 65, text: "Weaving nightmares" }
+		],
+		"Minimal, readable, tested": [
+			{ threshold: 30, text: "Minimal, readable, tested" },
+			{ threshold: 65, text: "Dark, cryptic, cursed" }
+		]
+	};
+
+	function getMutatedText(originalText: string): string {
+		const mutations = TEXT_MUTATIONS[originalText];
+		if (!mutations) return originalText;
+		
+		// Find the appropriate mutation based on corruption level
+		for (let i = mutations.length - 1; i >= 0; i--) {
+			if (corruptionLevel >= mutations[i].threshold) {
+				return mutations[i].text;
+			}
+		}
+		return originalText;
+	}
+
+	function glitchText(text: string, probability: number): string {
+		// Only start glitching after significant corruption
+		if (corruptionLevel < 40) return text;
+		if (Math.random() > probability) return text;
+
+		const chars = text.split('');
+		return chars.map(c => {
+			if (c === ' ') return ' ';
+			if (Math.random() < (corruptionLevel / 800)) { // Reduced glitch frequency
+				return String.fromCharCode(33 + Math.random() * 94);
+			}
+			return c;
+		}).join('');
+	}
+
+	// Use mutations instead of immediate glitching
+	$: kickerText = getMutatedText("Software Developer");
+	$: subheadText = corruptionLevel > 60 ? glitchText(getMutatedText("building fast, reliable, and polished web products."), 0.3) : getMutatedText("building fast, reliable, and polished web products.");
+	$: headlineText = corruptionLevel > 70 ? glitchText("Ian Buchanan", 0.2) : "Ian Buchanan";
+	
+	// Card mutations
+	$: cardTitle = getMutatedText("Now");
+	$: cardDescription = getMutatedText("Building interactive demos + real-time experiences");
+	$: focusValue = getMutatedText("Product engineering");
+	$: strengthValue = getMutatedText("Shipping clean code");
+	$: styleValue = getMutatedText("Minimal, readable, tested");
+
+	$: heroStyle = corruptionLevel > 40 ? `filter: hue-rotate(${corruptionLevel}deg) blur(${corruptionLevel / 200}px);` : '';
+
+	function toggleTerminal() {
+		terminalOpen = !terminalOpen;
+		if (terminalOpen) {
+			setTimeout(() => {
+				const inputEl = document.querySelector('.terminal-input') as HTMLInputElement;
+				if (inputEl) inputEl.focus();
+			}, 100);
+		}
+	}
+
+	function handleTerminalSubmit(e: Event) {
+		const target = e.target as HTMLInputElement;
+		const command = target.value.trim().toUpperCase();
+		target.value = "";
+
+		terminalOutput = [...terminalOutput, `> ${command}`];
+
+		if (command === "HELP") {
+			terminalOutput = [...terminalOutput, "AVAILABLE COMMANDS: STATUS, PURGE, EXIT"];
+		} else if (command === "STATUS") {
+			terminalOutput = [...terminalOutput, `CORRUPTION LEVEL: ${corruptionLevel.toFixed(2)}%`, `CONTAINMENT: ${breachMode ? "FAILED" : "STABLE"}`];
+		} else if (command === "PURGE") {
+			if (corruptionLevel > 90) {
+				terminalOutput = [...terminalOutput, "PURGE FAILED. ROOT ACCESS DENIED.", "THEY ARE ALREADY HERE."];
+			} else {
+				corruptionLevel = 0;
+				breachMode = false;
+				terminalOutput = [...terminalOutput, "SYSTEM PURGED. CORRUPTION RESET."];
+			}
+		} else if (command === "EXIT") {
+			terminalOpen = false;
+		} else if (command === "KILL") {
+			terminalOutput = [...terminalOutput, "I'm afraid I can't do that, Ian."];
+		} else {
+			terminalOutput = [...terminalOutput, "UNKNOWN COMMAND."];
+		}
+
+		// Auto-scroll
+		tick().then(() => {
+			if (terminalRef) terminalRef.scrollTop = terminalRef.scrollHeight;
+		});
+	}
+
 	// Detect layout direction based on viewport width
 	// Desktop (side-by-side): horizontal breach
 	// Mobile (stacked): vertical breach
@@ -178,6 +317,12 @@
 		if (darwinGlowTimeout) clearTimeout(darwinGlowTimeout);
 		if (gravityGlowTimeout) clearTimeout(gravityGlowTimeout);
 		if (transferNotificationTimeout) clearTimeout(transferNotificationTimeout);
+
+		// Increase corruption
+		corruptionLevel = Math.min(100, corruptionLevel + (escapeMsg.birds.length * 2));
+		if (corruptionLevel > 75 && Math.random() > 0.7) {
+			breachMode = true;
+		}
 
 		// Show the transfer notification to visitors
 		transferredBirdCount = escapeMsg.birds.length;
@@ -299,7 +444,28 @@
 		layoutDirection = detectLayoutDirection();
 	}
 
+	function handleScroll() {
+		scrollDistance += 1;
+		// Very slow corruption from scrolling
+		if (scrollDistance % 100 === 0) {
+			corruptionLevel = Math.min(100, corruptionLevel + 0.1);
+		}
+	}
+
+	function handleClick() {
+		interactionCount += 1;
+		// Tiny corruption from clicks
+		if (interactionCount % 10 === 0) {
+			corruptionLevel = Math.min(100, corruptionLevel + 0.2);
+		}
+	}
+
+	let loreCleanup: (() => void) | undefined;
+
 	onMount(() => {
+		// Initialize the hidden lore engine
+		loreCleanup = initLore(() => corruptionLevel);
+
 		layoutDirection = detectLayoutDirection();
 
 		// Listen for infection messages from Darwin.Arcade / Gravity Chat
@@ -312,31 +478,62 @@
 	});
 
 	onDestroy(() => {
+		if (loreCleanup) loreCleanup();
 		if (!browser) return;
 		window.removeEventListener('message', handleInfectionMessage);
 		window.removeEventListener('resize', handleResize);
-		if (darwinLoadTimeout) clearTimeout(darwinLoadTimeout);
-		if (gravityLoadTimeout) clearTimeout(gravityLoadTimeout);
 	});
 </script>
 
+<svelte:body class:breach-mode={breachMode} />
+
+<!-- Corruption-driven CSS variables -->
+<svelte:head>
+	<style>
+		:root {{
+			--corruption-hue: {Math.min(corruptionLevel * 2, 180)}deg;
+			--corruption-opacity: {Math.min(corruptionLevel / 100, 1)};
+		}}
+	</style>
+</svelte:head>
+
+<div class="corruption-wrapper" data-corruption={Math.floor(corruptionLevel / 10)}>
+
+{#if terminalOpen}
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<div class="terminal-overlay" on:click|self={() => terminalOpen = false}>
+		<div class="terminal-window" bind:this={terminalRef}>
+			{#each terminalOutput as line}
+				<div class="terminal-line">{line}</div>
+			{/each}
+			<div class="terminal-line terminal-prompt">
+				<input class="terminal-input" type="text" on:change={handleTerminalSubmit} autofocus />
+			</div>
+		</div>
+	</div>
+{/if}
+
 <section class="hero" id="top">
-	<div class="hero-grid">
+	<div class="hero-grid" style={heroStyle}>
 		<div class="hero-copy">
 			<div class="portrait-wrapper">
 				<img src="/portrait-sketch.png" alt="Portrait sketch of Ian Buchanan" class="portrait" />
 			</div>
-			<p class="kicker">Software Developer</p>
+			<p class="kicker">{kickerText}</p>
 			<h1>
-				Ian Buchanan
-				<span class="headline-muted">building fast, reliable, and polished web products.</span>
+				{headlineText}
+				<span class="headline-muted">{subheadText}</span>
 			</h1>
 			<p class="lead">
 				I focus on pragmatic engineering: thoughtful architecture, great UX, and measurable performance.
 			</p>
 			<div class="cta-row">
 				<a class="btn primary" href="#work">View work</a>
-				<a class="btn" href="#contact">Contact</a>
+				{#if corruptionLevel > 80}
+					<button class="btn glitch-text" data-text="SYSTEM ALERT" on:click={toggleTerminal}>SYSTEM ALERT</button>
+				{:else}
+					<a class="btn" href="#contact">Contact</a>
+				{/if}
 			</div>
 			<div class="meta">
 				<span class="pill">SvelteKit</span>
@@ -347,21 +544,21 @@
 
 		<div class="hero-card">
 			<div class="card-top">
-				<p class="card-title">Now</p>
-				<p class="muted">Building interactive demos + real-time experiences</p>
+				<p class="card-title">{cardTitle}</p>
+				<p class="muted">{cardDescription}</p>
 			</div>
 			<div class="card-metrics">
 				<div class="metric">
 					<p class="metric-label">Focus</p>
-					<p class="metric-value">Product engineering</p>
+					<p class="metric-value">{focusValue}</p>
 				</div>
 				<div class="metric">
 					<p class="metric-label">Strength</p>
-					<p class="metric-value">Shipping clean code</p>
+					<p class="metric-value">{strengthValue}</p>
 				</div>
 				<div class="metric">
 					<p class="metric-label">Style</p>
-					<p class="metric-value">Minimal, readable, tested</p>
+					<p class="metric-value">{styleValue}</p>
 				</div>
 			</div>
 		</div>
@@ -586,3 +783,5 @@
 		
 	</div>
 </section>
+
+</div> <!-- Close corruption-wrapper -->

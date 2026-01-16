@@ -846,3 +846,278 @@ a:hover {
 	border: 1px solid rgba(121, 255, 225, 0.5);
 	box-shadow: 0 0 12px rgba(121, 255, 225, 0.3);
 }
+
+/* ─── ARG / Corruption Styles ────────────────────────────────────────────── */
+
+/* Glitch Animations */
+@keyframes glitch-skew {
+	0% { transform: skew(0deg); }
+	20% { transform: skew(-10deg); }
+	40% { transform: skew(10deg); }
+	60% { transform: skew(-5deg); }
+	80% { transform: skew(5deg); }
+	100% { transform: skew(0deg); }
+}
+
+@keyframes glitch-flash {
+	0% { opacity: 1; }
+	50% { opacity: 0; }
+	51% { opacity: 1; }
+}
+
+@keyframes glitch-rgb {
+	0% { text-shadow: -2px 0 red, 2px 0 blue; }
+	25% { text-shadow: 2px 0 red, -2px 0 blue; }
+	50% { text-shadow: -2px 0 red, 2px 0 blue; }
+	75% { text-shadow: 2px 0 red, -2px 0 blue; }
+	100% { text-shadow: -2px 0 red, 2px 0 blue; }
+}
+
+/* Breach Mode - The "Infected" State */
+body.breach-mode {
+	--bg: #000000;
+	--bg-2: #1a0000;
+	--text: #ff3c3c;
+	--muted: #a00000;
+	--accent: #ff0000;
+	--accent-2: #550000;
+	--panel: rgba(50, 0, 0, 0.2);
+	--border: rgba(255, 0, 0, 0.4);
+
+	background:
+		linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+		linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+	background-size: 100% 2px, 3px 100%;
+	font-family: 'Courier New', Courier, monospace;
+}
+
+body.breach-mode .portrait {
+	filter: invert(1) contrast(2);
+}
+
+body.breach-mode h1,
+body.breach-mode h2,
+body.breach-mode h3 {
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	animation: glitch-rgb 0.2s infinite;
+}
+
+body.breach-mode .btn {
+	border-color: red;
+	color: red;
+	background: #1a0000;
+}
+
+body.breach-mode .btn:hover {
+	background: red;
+	color: black;
+}
+
+/* Glitch Utility Classes */
+.glitch-text {
+	position: relative;
+	display: inline-block;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+	content: attr(data-text);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.glitch-text::before {
+	left: 2px;
+	text-shadow: -1px 0 red;
+	clip: rect(24px, 550px, 90px, 0);
+	animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+	left: -2px;
+	text-shadow: -1px 0 blue;
+	clip: rect(85px, 550px, 140px, 0);
+	animation: glitch-anim 2.5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+	0% { clip: rect(14px, 9999px, 127px, 0); }
+	20% { clip: rect(86px, 9999px, 4px, 0); }
+	40% { clip: rect(26px, 9999px, 105px, 0); }
+	60% { clip: rect(98px, 9999px, 84px, 0); }
+	80% { clip: rect(3px, 9999px, 128px, 0); }
+	100% { clip: rect(41px, 9999px, 59px, 0); }
+}
+
+@keyframes glitch-anim-2 {
+	0% { clip: rect(65px, 9999px, 100px, 0); }
+	20% { clip: rect(117px, 9999px, 30px, 0); }
+	40% { clip: rect(10px, 9999px, 95px, 0); }
+	60% { clip: rect(32px, 9999px, 107px, 0); }
+	80% { clip: rect(2px, 9999px, 7px, 0); }
+	100% { clip: rect(129px, 9999px, 17px, 0); }
+}
+
+/* Terminal / Console Styles */
+.terminal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.95);
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: 'Fira Mono', monospace;
+	color: #0f0;
+}
+
+.terminal-window {
+	width: 800px;
+	height: 600px;
+	background: #000;
+	border: 2px solid #0f0;
+	padding: 20px;
+	overflow-y: auto;
+	box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+}
+
+.terminal-line {
+	margin: 5px 0;
+	white-space: pre-wrap;
+}
+
+.terminal-input {
+	background: transparent;
+	border: none;
+	color: #0f0;
+	font-family: inherit;
+	font-size: inherit;
+	width: 100%;
+	outline: none;
+}
+
+.terminal-prompt::before {
+	content: "> ";
+	color: #0f0;
+}
+
+/* ─── Gradual Corruption Effects ──────────────────────────────────────────── */
+/* Colors and effects subtly shift as corruption increases over time */
+
+.corruption-wrapper {
+	transition: filter 2s ease-out;
+}
+
+/* Corruption level 1-2 (10-20%): Barely noticeable hue shift */
+.corruption-wrapper[data-corruption="1"],
+.corruption-wrapper[data-corruption="2"] {
+	filter: hue-rotate(5deg);
+}
+
+/* Corruption level 3-4 (30-40%): Slight color shift becomes more apparent */
+.corruption-wrapper[data-corruption="3"],
+.corruption-wrapper[data-corruption="4"] {
+	filter: hue-rotate(15deg) saturate(1.1);
+}
+
+/* Corruption level 5-6 (50-60%): Noticeable shift toward red tones */
+.corruption-wrapper[data-corruption="5"],
+.corruption-wrapper[data-corruption="6"] {
+	filter: hue-rotate(30deg) saturate(1.2);
+}
+
+.corruption-wrapper[data-corruption="5"] .portrait,
+.corruption-wrapper[data-corruption="6"] .portrait {
+	filter: grayscale(0.2) sepia(0.1);
+}
+
+/* Corruption level 7-8 (70-80%): Obvious corruption, dark red tones */
+.corruption-wrapper[data-corruption="7"],
+.corruption-wrapper[data-corruption="8"] {
+	filter: hue-rotate(50deg) saturate(1.3) brightness(0.95);
+}
+
+.corruption-wrapper[data-corruption="7"] .portrait,
+.corruption-wrapper[data-corruption="8"] .portrait {
+	filter: grayscale(0.5) sepia(0.3) hue-rotate(-20deg);
+	animation: subtle-flicker 5s ease-in-out infinite;
+}
+
+/* Corruption level 9-10 (90-100%): Full horror mode */
+.corruption-wrapper[data-corruption="9"],
+.corruption-wrapper[data-corruption="10"] {
+	filter: hue-rotate(80deg) saturate(1.5) brightness(0.9);
+}
+
+.corruption-wrapper[data-corruption="9"] .portrait,
+.corruption-wrapper[data-corruption="10"] .portrait {
+	filter: grayscale(0.8) contrast(1.3) brightness(0.7) sepia(0.4) hue-rotate(-20deg);
+	animation: flicker 3s ease-in-out infinite;
+}
+
+@keyframes subtle-flicker {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.98;
+	}
+}
+
+@keyframes flicker {
+	0%, 100% {
+		opacity: 1;
+	}
+	25%, 75% {
+		opacity: 0.95;
+	}
+	50% {
+		opacity: 0.85;
+	}
+}
+
+/* Subtle text shadow that appears gradually */
+.corruption-wrapper[data-corruption="5"] h1,
+.corruption-wrapper[data-corruption="6"] h1,
+.corruption-wrapper[data-corruption="7"] h1,
+.corruption-wrapper[data-corruption="8"] h1 {
+	text-shadow: 1px 1px 2px rgba(139, 0, 0, 0.3);
+}
+
+.corruption-wrapper[data-corruption="9"] h1,
+.corruption-wrapper[data-corruption="10"] h1 {
+	text-shadow: 2px 2px 4px rgba(139, 0, 0, 0.6);
+}
+
+/* ─── Hidden Lore Styles ──────────────────────────────────────────────────── */
+
+.ghost-text {
+	opacity: 0.03;
+	pointer-events: none;
+	user-select: none;
+	font-family: var(--mono);
+	font-size: 0.8em;
+	letter-spacing: 0.1em;
+	color: var(--accent);
+	z-index: 0;
+	text-transform: lowercase;
+}
+
+/* Unsettling selection style */
+::selection {
+	background: rgba(121, 255, 225, 0.2);
+	color: inherit;
+}
+
+.breach-mode ::selection {
+	background: rgba(255, 0, 0, 0.3);
+	color: #fff;
+	text-shadow: 0 0 5px red;
+}
