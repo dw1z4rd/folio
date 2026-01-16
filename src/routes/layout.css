@@ -398,6 +398,7 @@ a:hover {
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
+	flex-wrap: wrap;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.10);
 	background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
 }
@@ -436,8 +437,49 @@ a:hover {
 	color: var(--text);
 }
 
+.embed-status {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-left: auto;
+}
+
+.status-chip {
+	font-family: var(--mono);
+	font-size: 11px;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	padding: 4px 8px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--muted);
+}
+
+.status-chip.bridge {
+	border-color: rgba(121, 255, 225, 0.3);
+	color: rgba(121, 255, 225, 0.9);
+}
+
+.status-chip[data-state='ready'] {
+	border-color: rgba(121, 255, 225, 0.45);
+	color: rgba(121, 255, 225, 0.95);
+}
+
+.status-chip[data-state='receiving'] {
+	border-color: rgba(167, 139, 250, 0.45);
+	color: rgba(167, 139, 250, 0.9);
+}
+
+.status-chip[data-state='blocked'],
+.status-chip[data-state='error'] {
+	border-color: rgba(255, 120, 120, 0.55);
+	color: rgba(255, 140, 140, 0.95);
+}
+
 .embed-frame {
 	background: rgba(0, 0, 0, 0.25);
+	position: relative;
 }
 
 .embed-frame iframe {
@@ -446,6 +488,41 @@ a:hover {
 	height: 560px;
 	border: 0;
 	background: #000;
+}
+
+.embed-overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 12px;
+	padding: 24px;
+	text-align: center;
+	background: rgba(6, 8, 23, 0.86);
+	backdrop-filter: blur(6px);
+	border-bottom-left-radius: var(--radius);
+	border-bottom-right-radius: var(--radius);
+}
+
+.embed-overlay-title {
+	margin: 0;
+	font-size: 16px;
+	letter-spacing: -0.01em;
+}
+
+.embed-overlay-body {
+	margin: 0;
+	color: var(--muted);
+	max-width: 38ch;
+}
+
+.embed-overlay-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	justify-content: center;
 }
 
 .cards.explain {

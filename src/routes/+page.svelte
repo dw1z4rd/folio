@@ -38,16 +38,59 @@
 		direction: BreachDirection;
 	}
 
+	interface InfectionStatusMessage {
+		type: 'infection-status';
+		source: 'darwin-arcade' | 'gravity-chat';
+		status: 'ready' | 'isolated' | 'receiving';
+		timestamp: number;
+	}
+
+	interface BridgeHelloMessage {
+		type: 'bridge-hello';
+		source: 'portfolio-bridge';
+		timestamp: number;
+	}
+
 	// Allowed origins for the infection protocol
-	const ALLOWED_DARWIN_ORIGINS = [
-		'https://ai.ianhas.one',
+	const safeOrigin = (url: string) => {
+		try {
+			return new URL(url).origin;
+		} catch {
+			return '*';
+		}
+	};
+
+	const darwinOrigin = safeOrigin(aiUrl);
+	const gravityOrigin = safeOrigin(chatUrl);
+
+	const DARWIN_ORIGINS = new Set([
+		'http://localhost:4173',
 		'http://localhost:5173',
-		'http://localhost:4173'
-	];
+		'https://ai.ianhas.one',
+		darwinOrigin
+	]);
+
+	const GRAVITY_ORIGINS = new Set([
+		'http://localhost:4173',
+		'http://localhost:5174',
+		'https://chat.ianhas.one',
+		gravityOrigin
+	]);
+
+	const isAllowedOrigin = (origin: string, allowed: Set<string>) =>
+		allowed.has(origin) || origin.startsWith('http://localhost:');
 
 	let darwinIframe: HTMLIFrameElement | null = null;
 	let gravityIframe: HTMLIFrameElement | null = null;
 	let layoutDirection: BreachDirection = 'horizontal';
+	let darwinEmbedState: 'loading' | 'ready' | 'blocked' | 'error' = 'loading';
+	let gravityEmbedState: 'loading' | 'ready' | 'blocked' | 'error' = 'loading';
+	let darwinBridgeStatus: 'unknown' | 'ready' | 'isolated' | 'receiving' = 'unknown';
+	let gravityBridgeStatus: 'unknown' | 'ready' | 'receiving' = 'unknown';
+	let darwinFrameKey = 0;
+	let gravityFrameKey = 0;
+	let darwinLoadTimeout: ReturnType<typeof setTimeout> | null = null;
+	let gravityLoadTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	// Glow effect state for bird transfer visualization
 	let darwinGlowing = false;
@@ -70,7 +113,11 @@
 	}
 
 	function isValidDarwinOrigin(origin: string): boolean {
-		return ALLOWED_DARWIN_ORIGINS.includes(origin) || origin.startsWith('http://localhost:');
+		return isAllowedOrigin(origin, DARWIN_ORIGINS);
+	}
+
+	function isValidGravityOrigin(origin: string): boolean {
+		return isAllowedOrigin(origin, GRAVITY_ORIGINS);
 	}
 
 	function isEscapeMessage(data: unknown): data is InfectionEscapeMessage {
@@ -79,15 +126,49 @@
 		return msg.type === 'darwin-escape' && msg.source === 'darwin-arcade' && Array.isArray(msg.birds);
 	}
 
+	function isStatusMessage(data: unknown): data is InfectionStatusMessage {
+		if (typeof data !== 'object' || data === null) return false;
+		const msg = data as Record<string, unknown>;
+		return msg.type === 'infection-status' && typeof msg.status === 'string';
+	}
+
+	function postBridgeHello(target: Window | null, targetOrigin: string) {
+		if (!target) return;
+		const message: BridgeHelloMessage = {
+			type: 'bridge-hello',
+			source: 'portfolio-bridge',
+			timestamp: Date.now()
+		};
+
+		try {
+			target.postMessage(message, targetOrigin === '*' ? '*' : targetOrigin);
+		} catch {
+			// Silently fail if posting fails
+		}
+	}
+
 	function handleInfectionMessage(event: MessageEvent): void {
-		// Validate origin
-		if (!isValidDarwinOrigin(event.origin)) return;
+		const data = event.data;
 
-		// Validate message
-		if (!isEscapeMessage(event.data)) return;
+		if (isEscapeMessage(data)) {
+			if (!isValidDarwinOrigin(event.origin)) return;
+			// Forward to Gravity Chat
+			forwardToGravityChat(data);
+			return;
+		}
 
-		// Forward to Gravity Chat
-		forwardToGravityChat(event.data);
+		if (isStatusMessage(data)) {
+			if (data.source === 'darwin-arcade') {
+				if (!isValidDarwinOrigin(event.origin)) return;
+				darwinBridgeStatus = data.status;
+				return;
+			}
+			if (data.source === 'gravity-chat') {
+				if (!isValidGravityOrigin(event.origin)) return;
+				gravityBridgeStatus = data.status;
+				return;
+			}
+		}
 	}
 
 	function forwardToGravityChat(escapeMsg: InfectionEscapeMessage): void {
@@ -136,11 +217,83 @@
 		};
 
 		try {
-			gravityIframe.contentWindow.postMessage(arrivalMsg, '*');
+			gravityBridgeStatus = 'receiving';
+			gravityIframe.contentWindow.postMessage(
+				arrivalMsg,
+				gravityOrigin === '*' ? '*' : gravityOrigin
+			);
 		} catch {
 			// Silently fail if posting fails
 		}
 	}
+
+	const EMBED_TIMEOUT_MS = 6500;
+
+	function startDarwinTimeout() {
+		if (darwinLoadTimeout) clearTimeout(darwinLoadTimeout);
+		darwinLoadTimeout = setTimeout(() => {
+			if (darwinEmbedState !== 'ready') darwinEmbedState = 'blocked';
+		}, EMBED_TIMEOUT_MS);
+	}
+
+	function startGravityTimeout() {
+		if (gravityLoadTimeout) clearTimeout(gravityLoadTimeout);
+		gravityLoadTimeout = setTimeout(() => {
+			if (gravityEmbedState !== 'ready') gravityEmbedState = 'blocked';
+		}, EMBED_TIMEOUT_MS);
+	}
+
+	function handleDarwinLoad() {
+		darwinEmbedState = 'ready';
+		if (darwinLoadTimeout) clearTimeout(darwinLoadTimeout);
+		postBridgeHello(darwinIframe?.contentWindow ?? null, darwinOrigin);
+	}
+
+	function handleGravityLoad() {
+		gravityEmbedState = 'ready';
+		if (gravityLoadTimeout) clearTimeout(gravityLoadTimeout);
+		postBridgeHello(gravityIframe?.contentWindow ?? null, gravityOrigin);
+	}
+
+	function reloadDarwin() {
+		darwinEmbedState = 'loading';
+		darwinBridgeStatus = 'unknown';
+		darwinFrameKey += 1;
+		startDarwinTimeout();
+	}
+
+	function reloadGravity() {
+		gravityEmbedState = 'loading';
+		gravityBridgeStatus = 'unknown';
+		gravityFrameKey += 1;
+		startGravityTimeout();
+	}
+
+	const embedLabel = (state: 'loading' | 'ready' | 'blocked' | 'error') => {
+		switch (state) {
+			case 'ready':
+				return 'Embed: live';
+			case 'blocked':
+				return 'Embed: blocked';
+			case 'error':
+				return 'Embed: error';
+			default:
+				return 'Embed: loading';
+		}
+	};
+
+	const bridgeLabel = (status: 'unknown' | 'ready' | 'isolated' | 'receiving') => {
+		switch (status) {
+			case 'ready':
+				return 'Bridge: ready';
+			case 'receiving':
+				return 'Bridge: receiving';
+			case 'isolated':
+				return 'Bridge: isolated';
+			default:
+				return 'Bridge: pending';
+		}
+	};
 
 	function handleResize(): void {
 		layoutDirection = detectLayoutDirection();
@@ -149,19 +302,21 @@
 	onMount(() => {
 		layoutDirection = detectLayoutDirection();
 
-		// Find the iframes after mount
-		darwinIframe = document.querySelector('iframe[title*="Darwin"]');
-		gravityIframe = document.querySelector('iframe[title*="Gravity"]');
-
-		// Listen for infection messages from Darwin.Arcade
+		// Listen for infection messages from Darwin.Arcade / Gravity Chat
 		window.addEventListener('message', handleInfectionMessage);
 		window.addEventListener('resize', handleResize);
+		startDarwinTimeout();
+		startGravityTimeout();
+		postBridgeHello(darwinIframe?.contentWindow ?? null, darwinOrigin);
+		postBridgeHello(gravityIframe?.contentWindow ?? null, gravityOrigin);
 	});
 
 	onDestroy(() => {
 		if (!browser) return;
 		window.removeEventListener('message', handleInfectionMessage);
 		window.removeEventListener('resize', handleResize);
+		if (darwinLoadTimeout) clearTimeout(darwinLoadTimeout);
+		if (gravityLoadTimeout) clearTimeout(gravityLoadTimeout);
 	});
 </script>
 
@@ -254,20 +409,44 @@
 					<h3>Darwin.Arcade</h3>
 					<p class="muted mono">ai.ianhas.one</p>
 				</div>
+				<div class="embed-status">
+					<span class="status-chip" data-state={darwinEmbedState}>{embedLabel(darwinEmbedState)}</span>
+					<span class="status-chip bridge" data-state={darwinBridgeStatus}>
+						{bridgeLabel(darwinBridgeStatus)}
+					</span>
+				</div>
 				{#if darwinGlowing}
 					<span class="transfer-badge source">SOURCE</span>
 				{/if}
 				<a class="embed-link" href={aiUrl} rel="noopener noreferrer">Open</a>
 			</header>
 			<div class="embed-frame">
-				<iframe
-					title="Darwin.Arcade (ai.ianhas.one)"
-					src={aiUrl}
-					loading="lazy"
-					referrerpolicy="strict-origin-when-cross-origin"
-					sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-					allow="fullscreen"
-				></iframe>
+				{#if darwinEmbedState !== 'ready'}
+					<div class="embed-overlay" aria-live="polite">
+						<p class="embed-overlay-title">
+							{darwinEmbedState === 'blocked' ? 'Embed blocked by browser' : 'Darwin.Arcade is loading…'}
+						</p>
+						<p class="embed-overlay-body">
+							If the embed is blocked by your browser, open it in a new tab.
+						</p>
+						<div class="embed-overlay-actions">
+							<button class="btn" type="button" on:click={reloadDarwin}>Reload</button>
+							<a class="btn primary" href={aiUrl} rel="noopener noreferrer">Open</a>
+						</div>
+					</div>
+				{/if}
+				{#key darwinFrameKey}
+					<iframe
+						bind:this={darwinIframe}
+						title="Darwin.Arcade (ai.ianhas.one)"
+						src={aiUrl}
+						loading="lazy"
+						referrerpolicy="strict-origin-when-cross-origin"
+						sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+						allow="fullscreen"
+						on:load={handleDarwinLoad}
+					></iframe>
+				{/key}
 			</div>
 		</article>
 
@@ -277,20 +456,46 @@
 					<h3>Gravity Chat</h3>
 					<p class="muted mono">chat.ianhas.one</p>
 				</div>
+				<div class="embed-status">
+					<span class="status-chip" data-state={gravityEmbedState}>
+						{embedLabel(gravityEmbedState)}
+					</span>
+					<span class="status-chip bridge" data-state={gravityBridgeStatus}>
+						{bridgeLabel(gravityBridgeStatus)}
+					</span>
+				</div>
 				{#if gravityGlowing}
 					<span class="transfer-badge destination">DESTINATION</span>
 				{/if}
 				<a class="embed-link" href={chatUrl} rel="noopener noreferrer">Open</a>
 			</header>
 			<div class="embed-frame">
-				<iframe
-					title="Gravity Chat (chat.ianhas.one)"
-					src={chatUrl}
-					loading="lazy"
-					referrerpolicy="strict-origin-when-cross-origin"
-					sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-					allow="fullscreen"
-				></iframe>
+				{#if gravityEmbedState !== 'ready'}
+					<div class="embed-overlay" aria-live="polite">
+						<p class="embed-overlay-title">
+							{gravityEmbedState === 'blocked' ? 'Embed blocked by browser' : 'Gravity Chat is loading…'}
+						</p>
+						<p class="embed-overlay-body">
+							If the embed is blocked by your browser, open it in a new tab.
+						</p>
+						<div class="embed-overlay-actions">
+							<button class="btn" type="button" on:click={reloadGravity}>Reload</button>
+							<a class="btn primary" href={chatUrl} rel="noopener noreferrer">Open</a>
+						</div>
+					</div>
+				{/if}
+				{#key gravityFrameKey}
+					<iframe
+						bind:this={gravityIframe}
+						title="Gravity Chat (chat.ianhas.one)"
+						src={chatUrl}
+						loading="lazy"
+						referrerpolicy="strict-origin-when-cross-origin"
+						sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+						allow="fullscreen"
+						on:load={handleGravityLoad}
+					></iframe>
+				{/key}
 			</div>
 		</article>
 	</div>
