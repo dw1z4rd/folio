@@ -66,7 +66,7 @@
 	let entropyTimer: ReturnType<typeof setInterval> | null = null;
 	let terminalOpen = false;
 	let terminalInput = "";
-		terminalOutput = [
+	let terminalOutput = [
 		"DARK SYSTEM MONITORING INITIALIZED...",
 		"CONNECTION TO THE VOID ESTABLISHED.",
 		"WARNING: ENTITIES DETECTED IN THE SHADOWS."
@@ -476,14 +476,14 @@
 			<p class="muted">Testing corruption, dark tooling, format chaos, pragmatic descent into madness.</p>
 		</div>
 		<div class="panel">
-			<h3">Performance Sacrifice</h3>
+			<h3>Performance Sacrifice</h3>
 			<p class="muted">Soul profiling, rendering nightmares, consuming main-thread sanity, measurable suffering.</p>
 		</div>
 	</div>
 </section>
 
 <section class="section" id="about">
-	<h2>About</h2>
+	<h2>About the Architect</h2>
 	<div class="about">
 		<p>
 			I’m Ian Buchanan. I build software with a product-first mindset and a strong preference for clean
@@ -491,6 +491,7 @@
 		</p>
 		<p class="muted">
 			This site exists at the threshold between worlds, manifesting at <span class="mono">ianhas.one</span>.
+			Enter if you dare.
 		</p>
 	</div>
 </section>
