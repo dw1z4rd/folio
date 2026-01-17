@@ -158,7 +158,7 @@
 	};
 
 	function getMutatedText(originalText: string): string {
-		const mutations = TEXT_MUTATIONS[originalText];
+		const mutations = TEXT_MUTATIONS[originalText as keyof typeof TEXT_MUTATIONS];
 		if (!mutations) return originalText;
 		
 		// Find the appropriate mutation based on corruption level
@@ -304,7 +304,13 @@
 			}
 			if (data.source === 'gravity-chat') {
 				if (!isValidGravityOrigin(event.origin)) return;
-				gravityBridgeStatus = data.status;
+				// Gravity chat status can include 'isolated', but we map it or ignore it if not compatible
+				const s = data.status;
+				if (s === 'ready' || s === 'receiving') {
+					gravityBridgeStatus = s;
+				} else {
+					gravityBridgeStatus = 'unknown';
+				}
 				return;
 			}
 		}
@@ -604,15 +610,6 @@
 					<h3>Darwin.Arcade</h3>
 					<p class="muted mono">ai.ianhas.one</p>
 				</div>
-				<div class="embed-status">
-					<span class="status-chip" data-state={darwinEmbedState}>{embedLabel(darwinEmbedState)}</span>
-					<span class="status-chip bridge" data-state={darwinBridgeStatus}>
-						{bridgeLabel(darwinBridgeStatus)}
-					</span>
-				</div>
-				{#if darwinGlowing}
-					<span class="transfer-badge source">SOURCE</span>
-				{/if}
 				<a class="embed-link" href={aiUrl} rel="noopener noreferrer">Open</a>
 			</header>
 			<div class="embed-frame">
@@ -651,17 +648,6 @@
 					<h3>Gravity Chat</h3>
 					<p class="muted mono">chat.ianhas.one</p>
 				</div>
-				<div class="embed-status">
-					<span class="status-chip" data-state={gravityEmbedState}>
-						{embedLabel(gravityEmbedState)}
-					</span>
-					<span class="status-chip bridge" data-state={gravityBridgeStatus}>
-						{bridgeLabel(gravityBridgeStatus)}
-					</span>
-				</div>
-				{#if gravityGlowing}
-					<span class="transfer-badge destination">DESTINATION</span>
-				{/if}
 				<a class="embed-link" href={chatUrl} rel="noopener noreferrer">Open</a>
 			</header>
 			<div class="embed-frame">
