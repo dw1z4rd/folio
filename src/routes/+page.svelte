@@ -473,8 +473,6 @@
 		window.addEventListener('resize', handleResize);
 		startDarwinTimeout();
 		startGravityTimeout();
-		postBridgeHello(darwinIframe?.contentWindow ?? null, darwinOrigin);
-		postBridgeHello(gravityIframe?.contentWindow ?? null, gravityOrigin);
 	});
 
 	onDestroy(() => {
@@ -785,3 +783,25 @@
 </section>
 
 </div> <!-- Close corruption-wrapper -->
+<style lang="scss">
+	@import '$lib/styles/variables.scss';
+	@import '$lib/styles/global.scss';
+	@import '$lib/styles/animations.scss';
+	@import '$lib/styles/typography.scss';
+	@import '$lib/styles/components.scss';
+	@import '$lib/styles/corruption.scss';
+	@import '$lib/styles/terminal.scss';
+	@import '$lib/styles/embeds.scss';
+	@import '$lib/styles/transfer-notification.scss';
+
+	.corruption-wrapper {
+		transition: filter 0.5s ease;
+	}
+
+	.breach-mode {
+		background-color: var(--color-background-breach);
+		color: var(--color-text-breach);
+	}
+
+	
+	</style>
