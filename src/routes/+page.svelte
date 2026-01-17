@@ -504,14 +504,23 @@
 <div class="corruption-wrapper" data-corruption={Math.floor(corruptionLevel / 10)}>
 
 {#if terminalOpen}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<div class="terminal-overlay" on:click|self={() => terminalOpen = false}>
+	<div
+		class="terminal-overlay"
+		role="button"
+		tabindex="0"
+		on:click|self={() => terminalOpen = false}
+		on:keydown={(event) => {
+			if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+				terminalOpen = false;
+			}
+		}}
+	>
 		<div class="terminal-window" bind:this={terminalRef}>
 			{#each terminalOutput as line}
 				<div class="terminal-line">{line}</div>
 			{/each}
 			<div class="terminal-line terminal-prompt">
-				<input class="terminal-input" type="text" on:change={handleTerminalSubmit} autofocus />
+				<input class="terminal-input" type="text" on:change={handleTerminalSubmit} />
 			</div>
 		</div>
 	</div>
@@ -769,25 +778,3 @@
 </section>
 
 </div> <!-- Close corruption-wrapper -->
-<style lang="scss">
-	@import '$lib/styles/variables.scss';
-	@import '$lib/styles/global.scss';
-	@import '$lib/styles/animations.scss';
-	@import '$lib/styles/typography.scss';
-	@import '$lib/styles/components.scss';
-	@import '$lib/styles/corruption.scss';
-	@import '$lib/styles/terminal.scss';
-	@import '$lib/styles/embeds.scss';
-	@import '$lib/styles/transfer-notification.scss';
-
-	.corruption-wrapper {
-		transition: filter 0.5s ease;
-	}
-
-	.breach-mode {
-		background-color: var(--color-background-breach);
-		color: var(--color-text-breach);
-	}
-
-	
-	</style>
